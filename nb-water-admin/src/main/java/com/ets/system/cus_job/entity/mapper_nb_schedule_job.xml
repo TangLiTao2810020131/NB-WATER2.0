@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ets.system.cus_job.dao.JobDao">
+
+	<insert id="insertJob" parameterType="com.ets.system.cus_job.entity.nb_schedule_job">
+		insert into nb_schedule_job
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="jobid != null">
+				jobid,
+			</if>
+			<if test="customercode != null">
+				customercode,
+			</if>
+			<if test="createtime != null">
+				createtime,
+			</if>
+			<if test="updatetime != null">
+				updatetime,
+			</if>
+			<if test="jobname != null">
+				jobname,
+			</if>
+			<if test="jobgroup != null">
+				jobgroup,
+			</if>
+			<if test="jobstatus != null">
+				jobstatus,
+			</if>
+			<if test="cronexpression != null">
+				cronexpression,
+			</if>
+			<if test="description != null">
+				description,
+			</if>
+			<if test="beanclass != null">
+				beanclass,
+			</if>
+			<if test="isconcurrent != null">
+				isconcurrent,
+			</if>
+			<if test="springid != null">
+				springid,
+			</if>
+			<if test="methodname != null">
+				methodname,
+			</if>
+			<if test="methodname != null">
+				executordate,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="jobid != null">
+				#{jobid},
+			</if>
+			<if test="customercode != null">
+				#{customercode},
+			</if>
+			<if test="createtime != null">
+				#{createtime},
+			</if>
+			<if test="updatetime != null">
+				#{updatetime},
+			</if>
+			<if test="jobname != null">
+				#{jobname},
+			</if>
+			<if test="jobgroup != null">
+				#{jobgroup},
+			</if>
+			<if test="jobstatus != null">
+				#{jobstatus},
+			</if>
+			<if test="cronexpression != null">
+				#{cronexpression},
+			</if>
+			<if test="description != null">
+				#{description},
+			</if>
+			<if test="beanclass != null">
+				#{beanclass},
+			</if>
+			<if test="isconcurrent != null">
+				#{isconcurrent},
+			</if>
+			<if test="springid != null">
+				#{springid},
+			</if>
+			<if test="methodname != null">
+				#{methodname},
+			</if>
+			<if test="methodname != null">
+				#{executordate},
+			</if>			
+		</trim>
+	</insert>
+</mapper>

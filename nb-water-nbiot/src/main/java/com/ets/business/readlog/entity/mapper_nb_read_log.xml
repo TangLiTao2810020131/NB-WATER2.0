@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.readlog.dao.ReadLogDao">
+
+	<!-- 上报数据新增记录 -->
+	<insert id="insertReadLog" parameterType="com.ets.business.readlog.entity.nb_read_log">
+		insert into nb_read_log values(#{id},#{content},#{ctime},#{deviceId},#{customercode},#{ipaddress},#{imei})
+	</insert>
+	
+</mapper>

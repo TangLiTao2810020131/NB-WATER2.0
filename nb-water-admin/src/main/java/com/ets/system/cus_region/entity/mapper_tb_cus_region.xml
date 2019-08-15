@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.system.cus_region.dao.CusRegionDao">
+
+	<insert id="insertCusRegionProvince"
+		parameterType="com.ets.system.cus_region.entity.tb_cus_region_province">
+		insert into
+		tb_cus_region_province
+		values(#{id},#{cusid},#{provinceid})
+	</insert>
+
+	<insert id="insertCusRegionCity" parameterType="com.ets.system.cus_region.entity.tb_cus_region_city">
+		insert into
+		tb_cus_region_city values(#{id},#{cusid},#{cityid},#{provinceid})
+	</insert>
+
+	<insert id="insertCusRegionArea" parameterType="com.ets.system.cus_region.entity.tb_cus_region_area">
+		insert into
+		tb_cus_region_area values(#{id},#{cusid},#{areaid},#{cityid})
+	</insert>
+
+	<delete id="deleteRegionProvince" parameterType="java.lang.String">
+		delete
+		from
+		tb_cus_region_province
+		where cusid = #{cusid}
+	</delete>
+
+	<delete id="deleteRegionCity" parameterType="java.lang.String">
+		delete
+		from
+		tb_cus_region_city
+		where cusid = #{cusid}
+	</delete>
+
+	<delete id="deleteRegionArea" parameterType="java.lang.String">
+		delete
+		from
+		tb_cus_region_area
+		where cusid = #{cusid}
+	</delete>
+
+	<select id="selectCusRegionProvince" resultType="com.ets.system.cus_region.entity.tb_cus_region_province"
+		parameterType="java.lang.String">
+		select * from tb_cus_region_province where cusid = #{cusid}
+	</select>
+
+	<select id="selectCusRegionCity" resultType="com.ets.system.cus_region.entity.tb_cus_region_city"
+		parameterType="com.ets.system.cus_region.entity.tb_cus_region_city">
+		select * from tb_cus_region_city where cusid = #{cusid} and provinceid = #{provinceid}
+	</select>
+
+	<select id="selectCusRegionArea" resultType="com.ets.system.cus_region.entity.tb_cus_region_area"
+		parameterType="com.ets.system.cus_region.entity.tb_cus_region_area">
+		select * from tb_cus_region_area where cusid = #{cusid} and cityid = #{cityid}
+	</select>
+
+</mapper>

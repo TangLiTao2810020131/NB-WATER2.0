@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.meterread.dao.MeterreadDao">
+
+	<!--  查询最新抄表数据的所有水表个数 -->
+	<select id="queryAllReadCount"  resultType="long">
+		select count(*)
+		  from NB_METERREAD t
+		  left join nb_watermeter_equipment e
+		    on e.id = t.watermeterid
+		  left join nb_owner o
+		    on o.doornumid = e.doornumid
+		  left join nb_residential_door d
+		    on d.id = e.doornumid
+		  left join nb_residential_building b
+		    on b.id = d.buildingid
+		  left join nb_residential_init r
+		    on r.id = b.residentialid
+	</select>
+	
+	<!-- 分页查询最新表读数相关的所以水表设备 -->
+	<select id="queryAllRead" parameterType="map" resultType="com.ets.business.statistic.entity.nb_water_statistics">
+		select *
+		  from (
+		  		select u.*, rownum rn
+		          from (
+		          		select o.id          as ownerid,
+		                       e.id          as equipmentid,
+		                       o.useraccount as useraccount,
+		                       o.username    as username,
+		                       t.value       as degrees,
+		                       r.id          as residentialid,
+		                       t.optiontime  as ctime
+		                  from NB_METERREAD t
+		                  left join nb_watermeter_equipment e
+		                    on e.id = t.watermeterid
+		                  left join nb_owner o
+		                    on o.doornumid = e.doornumid
+		                  left join nb_residential_door d
+		                    on d.id = e.doornumid
+		                  left join nb_residential_building b
+		                    on b.id = d.buildingid
+		                  left join nb_residential_init r
+		                    on r.id = b.residentialid) u
+		         where rownum <![CDATA[<=]]> #{page}
+		         )
+		 where rn > #{limit}
+	</select>
+	
+	<!-- 查询最新抄表数据的最新上报数据的所有水表个数 -->
+	<select id="queryAllReadCountOnLine"  resultType="long">
+		select count(*) from NB_METERREAD t
+	</select>
+	
+	<!-- 分页查询最新抄表数据的最新上报数据的所有水表 -->
+	<select id="queryAllReadOnLine" parameterType="map"  resultType="com.ets.business.meterread.entity.nb_meterread">
+		select *
+		  from (
+		  		select u.*, rownum rn
+		          from (
+		          		select * from NB_METERREAD u
+		          		) u
+		         where rownum <![CDATA[<=]]> #{page}
+		      )
+		 where rn > #{limit}
+	</select>
+</mapper>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.owner.dao.OwnerDao">
+
+    <!-- 查询业主信息 -->
+    <select id="infoOwner"  resultType="com.ets.business.owner.entity.nb_owner" parameterType="map">
+    	select * from nb_owner o  
+    	where  o.customercode = #{customercode}  and o.doornumid = #{doornumid}
+    </select>
+    
+</mapper>

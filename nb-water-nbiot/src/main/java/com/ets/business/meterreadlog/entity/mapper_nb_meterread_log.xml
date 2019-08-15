@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.meterreadlog.dao.MeterreadlogDao">
+    <!-- 新增最新抄表日志记录-->
+     <insert id="insertMeterreadlog" parameterType="com.ets.business.meterreadlog.entity.nb_meterread_log">
+        insert into nb_meterread_log values(#{id},#{watermeterid},#{value},#{type},#{optionuser},#{issuccess},#{messgae},#{ctime},#{customercode},#{optiontime})
+     </insert>
+     
+</mapper>

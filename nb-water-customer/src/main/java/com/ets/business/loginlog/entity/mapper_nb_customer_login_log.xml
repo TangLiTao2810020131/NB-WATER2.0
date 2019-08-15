@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ets.business.loginlog.dao.LoginLogDao">
+    <sql id="where">
+        <where>
+            <if test="ipaddress != null and ipaddress != '' "> and ipaddress = #{ipaddress}</if>
+            <if test="logintime != null and logintime != '' "> and logintime like '%${logintime}%'</if>
+            <if test="username != null and username != '' "> and username like '%${username}%'</if>
+            <if test="customerName != null and customerName != '' "> and customerName = #{customerName} </if>
+            <if test="loginState != null and loginState != '' "> and loginState = #{loginState} </if>
+            <if test="customercode != null and customercode != '' "> and u.customercode = #{customercode}</if>
+        </where>
+    </sql>
+
+    <!-- 分页列表 -->
+    <select id="getLogs" parameterType="map" resultType="com.ets.business.loginlog.entity.nb_customer_login_log">
+        select * from
+        (
+        select * from
+        (
+        select u.*,rownum rn from
+        (
+        select * from NB_CUSTOMER_LOGIN_LOG u
+        <include refid="where"></include>
+        order by u.logintime desc
+        ) u
+        where rownum <![CDATA[<=]]> #{page}
+        )
+        where rn > #{limit}
+        )
+    </select>
+
+    <!-- 获取总记录数 -->
+    <select id="getCount" parameterType="map" resultType="long">
+        select count(*) from NB_CUSTOMER_LOGIN_LOG u
+        <include refid="where"></include>
+    </select>
+
+    <!--增加日志信息-->
+    <insert id="addLog" parameterType="com.ets.business.loginlog.entity.nb_customer_login_log">
+     insert into NB_CUSTOMER_LOGIN_LOG values(#{id},#{ipaddress},#{logintime},#{customerName},#{username},#{loginState},#{customercode})
+    </insert>
+
+    <!-- 查看 -->
+    <select id="infoLog" resultType="com.ets.business.loginlog.entity.nb_customer_login_log" parameterType="java.lang.String">
+        select * from NB_CUSTOMER_LOGIN_LOG where id=#{id}
+    </select>
+
+
+
+
+
+
+
+
+
+</mapper>

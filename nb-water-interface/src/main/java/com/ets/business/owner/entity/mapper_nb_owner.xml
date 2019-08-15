@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.owner.dao.OwnerDao">
+
+    <!-- 根据客户id和户号查询业主信息,若户号为空则查询全部业主信息 -->
+    <select id="queryOwnerCusId" resultType="com.ets.business.owner.entity.nb_owner" parameterType="map">
+        select * from nb_owner where customercode=#{customerId}
+        <if test="useraccount != null and useraccount != '' ">  and useraccount = #{useraccount}</if>
+    </select>   
+    
+     
+</mapper>

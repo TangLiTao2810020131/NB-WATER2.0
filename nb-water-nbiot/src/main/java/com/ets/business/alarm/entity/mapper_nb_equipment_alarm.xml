@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.alarm.dao.EquipmentAlarmDao">
+
+    <!-- 新增告警记录 -->
+    <insert id="insertAlarm" parameterType="com.ets.business.alarm.entity.nb_equipment_alarm">
+   		insert into NB_EQUIPMENT_ALARM 
+   		(ID, CUSTOMERCODE, USERACCOUNT, USERNAME, ADDRESS, WATERMETERCODE, ALARMTYPE, ALARMSTATUS, ALARMTIME, CTIME)
+		values
+		(#{id}, #{customercode}, #{useraccount}, #{username}, #{address}, #{watermetercode}, #{alarmtype}, #{alarmstatus}, #{alarmtime}, #{ctime})
+    </insert>
+
+</mapper>

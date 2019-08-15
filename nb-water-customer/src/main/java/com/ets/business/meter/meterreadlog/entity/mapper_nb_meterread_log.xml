@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.meter.meterreadlog.dao.MeterreadlogDao">
+
+	<sql id="where">
+	 	<where>
+	 		<if test="areacode != null and areacode != '' "> and ri.areacode = #{areacode}</if>
+	 		<if test="customercode != null and customercode != '' "> and u.customercode = #{customercode}</if>
+	 		<if test="equipmentid != null and equipmentid != '' "> and e.id   = #{equipmentid}</if>			
+	 		<if test="startdate != null and startdate != '' "> and u.ctime <![CDATA[>=]]> #{startdate}</if>
+	 		<if test="enddate != null and enddate != '' "> and u.ctime <![CDATA[<=]]> #{enddate}</if>
+	 		<if test="type != null and type != '' "> and u.type = #{type}</if>		
+	 		<if test="yhname != null and yhname != '' "> and ouser.username  like '%${yhname}%'</if>
+	    </where>
+	</sql>
+	
+	<sql id="where1">
+	 	<where>
+	 		<if test="areacode != null and areacode != '' "> and ri.areacode = #{areacode}</if>
+	 		<if test="customercode != null and customercode != '' "> and u.customercode = #{customercode}</if>
+	 		<if test="equipmentid != null and equipmentid != '' "> and e.id   = #{equipmentid}</if>		 	 				 		
+	    </where>
+	</sql>
+
+	<!-- 列表 -->
+	<select id="selectMeterreadlog" parameterType="map"  resultType="com.ets.business.meter.meterreadlog.entity.MeterreadLogModel">
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select u.id           meterreadid,
+							       e.id           equipmentid,
+							       e.basenum,
+							       ri.name        xqname,
+							       rb.building,
+							       rd.doornum,
+							       ouser.username yhname,
+							       u.value,
+							       u.type,
+							       u.issuccess,
+							       u.messgae,
+							       cu.realname    optionname,
+							       u.optiontime,
+							       u.ctime
+							  from nb_meterread_log u
+							  left join nb_watermeter_equipment e
+							    on e.id = u.watermeterid
+							  left join nb_owner ouser
+							    on e.doornumid = ouser.doornumid
+							  left join nb_customer_user cu
+							    on cu.id = u.optionuser
+							  left join nb_residential_door rd
+							    on rd.id = e.doornumid
+							  left join nb_residential_building rb
+							    on rb.id = rd.buildingid
+							  left join nb_residential_init ri
+							    on ri.id = rb.residentialid					    
+							 <include refid="where"></include>
+							order by u.optiontime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+     <!-- 获取总记录数 -->
+    <select id="selectCount" parameterType="map"  resultType="long">
+		select count(*)
+		  from nb_meterread_log u
+		  left join nb_watermeter_equipment e
+		    on e.id = u.watermeterid
+		  left join nb_owner ouser
+		    on e.doornumid = ouser.doornumid
+		  left join nb_customer_user cu
+		    on cu.id = u.optionuser
+		  left join nb_residential_door rd
+		    on rd.id = e.doornumid
+		  left join nb_residential_building rb
+		    on rb.id = rd.buildingid
+		  left join nb_residential_init ri
+		    on ri.id = rb.residentialid
+		<include refid="where1"></include>
+    </select> 
+    
+    <!-- 新增 -->
+     <insert id="insertMeterreadlog" parameterType="com.ets.business.meter.meterreadlog.entity.nb_meterread_log">
+        insert into nb_meterread_log values(#{id},#{watermeterid},#{value},#{type},#{optionuser},#{issuccess},#{messgae},#{ctime},#{customercode},#{optiontime})
+     </insert>
+     
+      <!-- 删除 -->
+    <delete id="deleteMeterreadlog" parameterType="java.lang.String">
+        delete from nb_meterread_log where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </delete>
+    
+     <!-- 更新 -->
+    <update id="updateMeterreadlog" parameterType="com.ets.business.meter.meterreadlog.entity.nb_meterread_log">
+        update nb_meterread_log set value=#{value},type=#{type},optionuser=#{optionuser},ctime=#{ctime},watermeterid=#{watermeterid},issuccess=#{issuccess},messgae=#{messgae},optiontime=#{optiontime}  where id=#{id}
+    </update>
+    
+     <!-- 查看 -->
+    <select id="infoMeterreadlog" resultType="com.ets.business.meter.meterreadlog.entity.nb_meterread_log" parameterType="java.lang.String">
+        select * from nb_meterread_log where id=#{id}
+    </select>
+    
+    <select id="selectBalanceEndTimeMeterreadLog" resultType="com.ets.business.meter.meterreadlog.entity.nb_meterread_log" parameterType="map">
+      	select * from (select * from nb_meterread_log where customercode = #{customerCode} and watermeterid = #{waterMeterId} and optiontime <![CDATA[<]]> '${balanceMonth}' ORDER BY optiontime DESC) tab where ROWNUM = 1 
+    </select>
+
+	<select id="selectBalanceStartTimeMeterreadLog" resultType="com.ets.business.meter.meterreadlog.entity.nb_meterread_log" parameterType="map">
+      	select * from (select * from nb_meterread_log where customercode = #{customerCode} and watermeterid = #{waterMeterId} and optiontime like '%${balanceMonth}%' ORDER BY optiontime ASC) tab where ROWNUM = 1
+    </select>
+    
+    
+    <!-- 列表 -->
+	<select id="selectMeterreadlogEX" parameterType="map"  resultType="com.ets.business.meter.meterreadlog.entity.MeterreadLogModel">
+						select u.id meterreadid,
+						       e.id equipmentid,
+						       e.basenum,
+						       ri.name xqname,
+						       rb.building,
+						       rd.doornum,
+						       ouser.username yhname,
+						       u.value,
+						       CASE u.type
+						         WHEN '-1' THEN
+						          '更换水表'
+						         WHEN '0' THEN
+						          '初次安装'
+						         WHEN '1' THEN
+						          '自动抄表'
+						         WHEN '2' THEN
+						          '手动抄表'
+						       end as type,
+						       CASE u.issuccess
+						         WHEN '0' THEN
+						          '失败'
+						         WHEN '1' THEN
+						          '成功'
+						       end as issuccess,
+						       u.messgae,
+						       cu.realname optionname,
+						       u.optiontime,
+						       u.ctime
+						  from nb_meterread_log u
+						  left join nb_watermeter_equipment e
+						    on e.id = u.watermeterid
+						  left join nb_owner ouser
+						    on e.doornumid = ouser.doornumid
+						  left join nb_customer_user cu
+						    on cu.id = u.optionuser
+						  left join nb_residential_door rd
+						    on rd.id = e.doornumid
+						  left join nb_residential_building rb
+						    on rb.id = rd.buildingid
+						  left join nb_residential_init ri
+						    on ri.id = rb.residentialid
+							 <include refid="where"></include>
+							order by u.optiontime desc
+    </select>
+    <select id="selectWMLatestNumCusId" resultType="com.ets.business.meter.meterreadlog.entity.nb_meterread_log" parameterType="map">
+      select t.* from nb_meterread_log t
+      left join nb_watermeter_equipment e on e.id = t.watermeterid
+    	where t.customercode = #{customerId} 
+       <if test="watermetercode != null and watermetercode != '' ">  and e.watermetercode = #{watermetercode}</if>
+       <if test="startDate != null and startDate != '' "> and t.optiontime <![CDATA[>=]]> #{startDate}</if>
+	  <if test="endDate != null and endDate != '' "> and t.optiontime <![CDATA[<=]]> #{endDate}</if>
+    </select>
+    
+    <select id="selectLogByEidTime" resultType="com.ets.business.meter.meterreadlog.entity.nb_meterread_log" parameterType="map">
+    	select * from (
+    		select * from NB_METERREAD_LOG t  where t.watermeterid = #{eid} and t.optiontime like '${time}%' order by t.optiontime desc 
+    	) where  rownum  = 1 
+    </select>
+    
+</mapper>

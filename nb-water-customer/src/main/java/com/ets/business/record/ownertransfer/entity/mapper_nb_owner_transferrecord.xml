@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.record.ownertransfer.dao.OwnertransferDao">
+
+<sql id="where">
+ 	<where> 
+ 			<if test="customercode != null and customercode != '' "> and u.customercode = #{customercode}</if>
+ 			<if test="areacode != null and areacode != '' "> and u.customercode = #{areacode}</if>
+	 		<if test="startdate != null and startdate != '' "> and u.ctime <![CDATA[>=]]> #{startdate}</if>
+	 		<if test="enddate != null and enddate != '' "> and u.ctime <![CDATA[<=]]> #{enddate}</if>
+	 		<if test="olduseraccount != null and olduseraccount != '' "> and u.olduseraccount like '%${olduseraccount}%'</if>
+	 		<if test="newuseraccount != null and newuseraccount != '' "> and u.newuseraccount like '%${newuseraccount}%'</if>
+	 		<if test="oldidcard != null and oldidcard != '' "> and u.oldidcard = #{oldidcard}</if>
+	 		<if test="newidcard != null and newidcard != '' "> and u.newidcard = #{newidcard}</if>
+     </where>
+</sql>
+
+	<!-- 获取角色权限列表 -->
+	<select id="selectTransferrecord" parameterType="map"  resultType="com.ets.business.record.ownertransfer.entity.nb_owner_transferrecord">
+<!-- 			<![CDATA[select * from (select u.*,rownum rn from nb_owner_transferrecord u where rownum <= #{page} order by u.ctime desc) where rn > #{limit}]]>  -->
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select * from nb_owner_transferrecord u 
+							  <include refid="where"></include>
+							 order by u.ctime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+    
+    <!-- 获取总记录数 -->
+    <select id="selectCount" parameterType="map"  resultType="long">
+    	select count(*) from nb_owner_transferrecord u  <include refid="where"></include>
+    </select>
+    
+    <!-- 新增 -->
+    <insert id="insertTransferrecord" parameterType="com.ets.business.record.ownertransfer.entity.nb_owner_transferrecord">
+        insert into nb_owner_transferrecord values(#{id},#{customercode},#{watermetercode},
+        #{olduseraccount},#{oldusername},#{newuseraccount},#{newuaername},#{transferread},#{address},
+        #{describe},#{ctime},#{oldidcard},#{newidcard})
+    </insert>
+   
+</mapper>

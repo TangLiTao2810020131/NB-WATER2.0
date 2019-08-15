@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.equipentrecord.dao.EquipmentRecordDao">
+
+    <sql id="whereGetEquipmentRecordList">
+		<where>
+			<if test="customercode != null and customercode != '' "> and u.customercode = #{customercode}</if>
+			<if test="startdate != null and startdate != '' "> and u.installdate <![CDATA[>=]]> #{startdate}</if>
+	 		<if test="enddate != null and enddate != '' "> and u.installdate <![CDATA[<=]]> #{enddate}</if>
+	 		<if test="watermetercode != null and watermetercode != '' "> and u.watermetercode = #{watermetercode}</if>
+		</where>
+	</sql>
+	<!-- 查询水表注册记录 -->
+	<select id="getEquipmentRecordList" parameterType="map"  resultType="com.ets.business.equipentrecord.entity.nb_watermeter_record">
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select * from nb_watermeter_record u 
+							 <include refid="whereGetEquipmentRecordList"></include>
+							 order by u.ctime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+ 
+    <!-- 获取总记录数 -->
+    <select id="getCount"  resultType="long">
+    	select count(*) from nb_watermeter_record u
+    	<include refid="whereGetEquipmentRecordList"></include>
+    </select>
+    
+    <sql id="whereGetEquipmentRecord">
+		<where>
+			<if test="id != null and id != '' "> and u.id = #{id}</if>
+			<if test="watermeterid != null and watermeterid != '' "> and u.watermeterid = #{watermeterid}</if>
+			<if test="doornumid != null and doornumid != '' "> and u.doornumid = #{doornumid}</if>
+			<if test="customercode != null and customercode != '' "> and u.customercode = #{customercode}</if>
+		</where>
+	</sql>
+    
+    <select id="getEquipmentRecord" parameterType="map"  resultType="com.ets.business.equipentrecord.entity.nb_watermeter_record">
+    	select * from nb_watermeter_record u 
+    	<include refid="whereGetEquipmentRecord"></include>
+    </select>
+    
+    <insert id="insertEquipmentRecord" parameterType = "com.ets.business.equipentrecord.entity.nb_watermeter_record">
+	    insert into NB_WATERMETER_RECORD 
+	    (ID, CUSTOMERCODE, WATERMETERID, USERACCOUNT, USERNAME, WATERMETER, BASENUM, OPTIONUSER, ADDRESS, DOORNUMID, CTIME,INSTALLDATE,WATERMETERCODE)
+		values (#{id}, #{customercode}, #{watermeterid}, #{useraccount}, #{username}, #{watermeter}, #{basenum}, #{optionuser}, #{address}, #{doornumid}, #{ctime},#{installdate},#{watermetercode})
+    </insert>
+	
+	<update id="updateEquipmentRecord" parameterType = "com.ets.business.equipentrecord.entity.nb_watermeter_record">
+		update NB_WATERMETER_RECORD set USERACCOUNT = #{useraccount},USERNAME = #{username} where id = #{id}
+	</update>
+</mapper>

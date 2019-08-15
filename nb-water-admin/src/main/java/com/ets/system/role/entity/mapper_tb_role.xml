@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.system.role.dao.RoleDao">
+
+<!-- 获取全部角色 -->
+	<select id="getAllRoles"  resultType="com.ets.system.role.entity.tb_role">
+		select * from tb_role order by ctime
+	</select>
+
+	<!-- 获取角色权限列表 -->
+	<select id="getRoles" parameterType="map"  resultType="com.ets.system.role.entity.tb_role">
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select * from tb_role u 
+							<!--  <include refid="where"></include>  -->
+							order by u.ctime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+    
+    <!-- 获取总记录数 -->
+    <select id="getCount"  resultType="long">
+    	select count(*) from tb_role
+    </select>
+    
+    <!-- 新增 -->
+    <insert id="addRole" parameterType="com.ets.system.role.entity.tb_role">
+
+        insert into tb_role values(#{id},#{rolename},#{descr},#{ctime})
+
+    </insert>
+    
+    <!-- 删除 -->
+    <delete id="deleteRole" parameterType="java.lang.String">
+        delete from tb_role where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </delete>
+    
+    <!-- 更新资源 -->
+    <update id="updateRole" parameterType="com.ets.system.role.entity.tb_role">
+        update tb_role set descr=#{descr},rolename=#{rolename} where id=#{id}
+    </update>
+    
+    <!-- 查看资源 -->
+    <select id="infoRole" resultType="com.ets.system.role.entity.tb_role" parameterType="java.lang.String">
+        select * from tb_role where id=#{id}
+    </select>
+    <!--根据角色名查看数据库是否有该名-->
+    <select id="findRole" resultType="long" parameterType="java.lang.String">
+        select count(*) from TB_ROLE where rolename=#{rolename}
+    </select>
+    
+</mapper>

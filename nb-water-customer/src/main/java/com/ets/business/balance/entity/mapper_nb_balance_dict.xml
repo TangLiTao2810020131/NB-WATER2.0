@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.balance.dao.BalanceDao">
+
+	<sql id="where">
+	 	<where>
+	 		<if test="customercode != null and customercode != '' "> and t.customercode = #{customercode}</if>
+	 		<if test="areacode != null and areacode != '' "> and i.areacode = #{areacode}</if>
+	 		<if test="balancemonth != null and balancemonth != '' "> and t.balancemonth = #{balancemonth}</if>		 		
+	       	<if test="useraccount != null and useraccount != '' "> and t.useraccount like '%${useraccount}%'</if>
+	    </where>
+	</sql>
+	<!-- 获取角色权限列表 -->
+	<select id="selectBalance" parameterType="map"  resultType="com.ets.business.balance.entity.nb_balance_dict">
+				select * from 
+					(
+						select u.*,rownum rn from 
+						(
+								select t.id,
+									   o.useraccount,
+								       o.username,
+								       t.startnum,
+								       t.startnumdate,
+								       t.endnum,
+								       t.endnumdate,
+								       t.balancemonth,
+								       t.ctime,
+								       t.describe,
+								       p.province || '-' || c.city || '-' || a.area || '-' || i.name || '-' ||
+								       b.building || '栋' || '-' || d.doornum || '室' address
+								  from nb_balance t
+								left join nb_watermeter_equipment e on  e.id = t.watermeterid
+								left join nb_owner o on o.doornumid = e.doornumid
+								left join nb_residential_door d on d.id = e.doornumid
+								left join nb_residential_building b on b.id = d.buildingid
+								left join nb_residential_init i on i.id = b.residentialid
+								left join tb_province p on p.id = i.provincecode
+								left join tb_city c on c.id = i.citycode
+								left join tb_area a on a.id = i.areacode
+							 <include refid="where"></include>
+							 order by t.ctime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+    </select>
+    
+    <!-- 获取总记录数 -->
+    <select id="selectCount" parameterType="map"  resultType="long">
+		select count(*)
+		  from nb_balance t
+		left join nb_watermeter_equipment e on  e.id = t.watermeterid
+		left join nb_owner o on o.doornumid = e.doornumid
+		left join nb_residential_door d on d.id = e.doornumid
+		left join nb_residential_building b on b.id = d.buildingid
+		left join nb_residential_init i on i.id = b.residentialid
+		left join tb_province p on p.id = i.provincecode
+		left join tb_city c on c.id = i.citycode
+		left join tb_area a on a.id = i.areacode
+		<include refid="where"></include>
+    </select>
+    
+    <!-- 新增 -->
+    <insert id="insertBalance" parameterType="com.ets.business.balance.entity.nb_balance_dict">
+        insert into nb_balance values(#{id},#{customercode},#{watermeterid},#{useraccount},#{username},
+  									  #{startnum},#{startnumdate},#{endnum},#{endnumdate},#{balancemonth},#{describe},#{ctime})
+    </insert>
+    
+        <!-- 获取总记录数 -->
+    <select id="checkBalanceDate" resultType="java.lang.Integer" parameterType="map">
+    	select count(*) from nb_balance where customercode = #{customerCode} and watermeterid = #{waterMeterId} and balancemonth = #{balanceMonth}
+    </select>
+  
+  	<select id="infoBalance" parameterType="map"  resultType="com.ets.business.balance.entity.BalanceModel">
+		select o.useraccount,
+		       o.username,
+		       t.startnum,
+		       t.startnumdate,
+		       t.endnum,
+		       t.endnumdate,
+		       t.balancemonth,
+		       p.province || '-' || c.city || '-' || a.area || '-' || i.name || '-' ||
+		       b.building || '栋' || '-' || d.doornum || '室' address
+		  from nb_balance t
+		left join nb_watermeter_equipment e on  e.id = t.watermeterid
+		left join nb_owner o on o.doornumid = e.doornumid
+		left join nb_residential_door d on d.id = e.doornumid
+		left join nb_residential_building b on b.id = d.buildingid
+		left join nb_residential_init i on i.id = b.residentialid
+		left join tb_province p on p.id = i.provincecode
+		left join tb_city c on c.id = i.citycode
+		left join tb_area a on a.id = i.areacode
+		where t.customercode = #{customerCode} and t.id = #{id}
+  	</select>
+  	
+  	<select id="selectLastBalance" parameterType="map"  resultType="com.ets.business.balance.entity.nb_balance_dict">
+  		select * from nb_balance t where t.balancemonth = #{lastTime} and watermeterid = #{watermeterid} and customercode = #{customercode}
+  	</select>
+  	
+  	
+  		<!-- 获取角色权限列表 -->
+	<select id="selectBalanceExport" parameterType="map"  resultType="com.ets.business.balance.entity.nb_balance_dict">
+	select t.id,
+									   o.useraccount,
+								       o.username,
+								       t.startnum,
+								       t.startnumdate,
+								       t.endnum,
+								       t.endnumdate,
+								       t.balancemonth,
+								       t.describe,
+								       p.province || '-' || c.city || '-' || a.area || '-' || i.name || '-' ||
+								       b.building || '栋' || '-' || d.doornum || '室' address
+								  from nb_balance t
+								left join nb_watermeter_equipment e on  e.id = t.watermeterid
+								left join nb_owner o on o.doornumid = e.doornumid
+								left join nb_residential_door d on d.id = e.doornumid
+								left join nb_residential_building b on b.id = d.buildingid
+								left join nb_residential_init i on i.id = b.residentialid
+								left join tb_province p on p.id = i.provincecode
+								left join tb_city c on c.id = i.citycode
+								left join tb_area a on a.id = i.areacode
+							 <include refid="where"></include>
+							 order by t.ctime desc
+    </select>
+  	
+</mapper>

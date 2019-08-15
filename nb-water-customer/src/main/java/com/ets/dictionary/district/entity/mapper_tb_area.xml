@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.dictionary.district.dao.AreaDao">
+
+	<sql id="where">
+	 	<where>
+	        <if test="father != null and father != '' "> and u.father=#{father}</if>
+	    </where>
+	</sql>
+
+<!-- 获取县区列表 -->
+	<select id="getAreas" parameterType="map"  resultType="com.ets.dictionary.district.entity.tb_area">
+		<!-- <![CDATA[select * from (select * from (select u.*,rownum rn from tb_area u where rownum <= #{page}  and father=#{father} ) where rn > #{limit})     ]]>  -->
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select * from tb_area u 
+							 <include refid="where"></include> 
+						) u 
+						where rownum <![CDATA[<=]]> #{page}
+                        order by areaid asc
+					) 
+					where rn > #{limit}
+				)
+    </select>
+    
+    <!-- 获取县区列表 -->
+	<select id="getAreaAll" parameterType="map"  resultType="com.ets.dictionary.district.entity.tb_area">
+						
+							select * from tb_area u 
+							 <include refid="where"></include> 
+    </select>
+    
+ <!-- 获取总记录数 -->
+    <select id="getCount" parameterType="java.lang.String" resultType="long">
+    	select count(*) from tb_area where father=#{father}
+    </select>
+    
+    <!-- 新增省 -->
+     <insert id="addArea" parameterType="com.ets.dictionary.district.entity.tb_area">
+        insert into tb_area values(#{areaid},#{area},#{father},#{id})
+     </insert>
+     
+     <!-- 删除 -->
+    <delete id="deleteArea" parameterType="java.lang.String">
+        delete from tb_area where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </delete>
+    
+    <!-- 更新 -->
+    <update id="updateArea" parameterType="com.ets.dictionary.district.entity.tb_area">
+        update tb_area set areaid=#{areaid},area=#{area} where id=#{id}
+    </update>
+    
+     <!-- 查看 -->
+    <select id="infoArea" resultType="com.ets.dictionary.district.entity.tb_area" parameterType="java.lang.String">
+        select * from tb_area where id=#{id}
+    </select>
+    <!-- 根据father查询 -->
+    <select id="selectListByfather" resultType="com.ets.dictionary.district.entity.tb_area" parameterType="java.lang.String">
+        select * from TB_AREA t where father = #{father}
+    </select>
+
+    <!--根据城市代码查询地区-->
+    <select id="findCityByCode" resultType="com.ets.dictionary.district.entity.tb_city" parameterType="java.lang.String">
+        select * from tb_city t where cityid=#{cityid}
+    </select>
+
+    <select id="isCkeckAreaid" parameterType="java.lang.String" resultType="int">
+        select count(*) from TB_AREA where AREAID=#{areaid}
+    </select>
+    
+         <!-- 查看 -->
+    <select id="selectListArea" resultType="com.ets.dictionary.district.entity.tb_area" parameterType="java.lang.String">
+        select * from tb_area where father = #{cityid}
+    </select>
+
+</mapper>

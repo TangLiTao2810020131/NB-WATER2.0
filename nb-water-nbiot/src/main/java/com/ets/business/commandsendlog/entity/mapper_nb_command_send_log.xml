@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.commandsendlog.dao.CommandSendLogDao">
+    
+    <!-- 根据commandId查询命令发送记录信息 -->
+    <select id="info"  parameterType="map"  resultType="com.ets.business.commandsendlog.entity.nb_command_send_log">
+   	 	select * from NB_COMMAND_SEND_LOG u  where u.commandid = #{commandid}
+    </select>
+
+	<!-- 新增命令下发记录 -->
+	<insert id="insertCommandSendLog" parameterType="com.ets.business.commandsendlog.entity.nb_command_send_log">
+		insert into NB_COMMAND_SEND_LOG (ID, COMMANDID, DEVICEID, COMMAND, SENDTIME, EXECUTETIME,CUSTOMERCODE,IMEI)
+										values (#{id}, #{commandid}, #{deviceid}, #{command}, #{sendtime}, #{executetime},#{customercode},#{imei})
+	</insert>
+	
+	<!-- 修改下发命令记录 -->
+	<update id ="updateCommandSendLog" parameterType="com.ets.business.commandsendlog.entity.nb_command_send_log">
+		update nb_command_send_log set rcommand = #{rcommand},status=#{status},ctime=#{ctime} where commandid = #{commandid}
+	</update>
+	
+</mapper>

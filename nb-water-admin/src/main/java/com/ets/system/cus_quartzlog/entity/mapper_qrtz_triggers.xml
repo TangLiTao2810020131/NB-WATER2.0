@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.system.cus_quartzlog.dao.QuartzDao">
+
+	<!-- 获取角色权限列表 -->
+	<select id="selectQrtzTriggers" parameterType="map"  resultType="com.ets.system.cus_quartzlog.entity.qrtz_triggers">
+			<!-- <![CDATA[select * from (select u.*,rownum rn from NB_PAY_DICT u where rownum <= #{page} ) where rn > #{limit}]]> --> 
+			select * from 
+				(
+					select * from 
+					(
+						select 
+						u.trigger_name triggerName,
+						u.trigger_group triggerGroup,
+						u.job_name jobName,
+						u.job_group jobGroup,
+						u.description description,
+						u.next_fire_time nextFireTime,
+						u.prev_fire_time prevFireTime,
+						u.priority priority,
+						u.trigger_state triggerState,
+						u.trigger_type triggerType,
+						u.start_time startTime,
+						u.end_time endTime,
+						u.calendar_name calendarName,
+						u.misfire_instr misfireInstr,
+						rownum rn from 
+						(
+							select * from QRTZ_TRIGGERS u 
+							 <!-- <include refid="where"></include>  -->
+							 order by u.start_time
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+ 
+    <!-- 获取总记录数 -->
+    <select id="selectCount"  resultType="long">
+    	select count(*) from QRTZ_TRIGGERS
+    </select>
+
+</mapper>

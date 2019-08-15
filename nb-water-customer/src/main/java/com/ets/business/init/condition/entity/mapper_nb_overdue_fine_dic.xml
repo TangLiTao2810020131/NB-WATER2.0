@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.init.condition.dao.OverdueFineDicDao">
+
+	<!-- 更新 -->
+    <update id="update" parameterType="com.ets.business.init.condition.entity.nb_overdue_fine_dic">
+        update nb_overdue_fine_dic set price=#{price} where id=#{id}
+    </update>
+    
+     <!-- 查看 -->
+    <select id="info" resultType="com.ets.business.init.condition.entity.nb_overdue_fine_dic" parameterType="java.lang.String">
+        select * from nb_overdue_fine_dic where customerId=#{customerId}
+    </select>
+    
+    <!-- 新增 -->
+    <insert id="add" parameterType="com.ets.business.init.condition.entity.nb_overdue_fine_dic">
+        insert into nb_overdue_fine_dic values(#{id},#{price},#{customerId})
+     </insert>
+     
+</mapper>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.statistic.dao.WaterStatisticDao">
+
+	<!-- 添加水表统计记录 -->
+	<insert id="inserWaterStatistic" parameterType="com.ets.business.statistic.entity.nb_water_statistics">
+		insert into NB_WATER_STATISTICS values(#{id},#{ownerid},#{equipmentid},#{useraccount},#{username},#{degrees},#{residentialid},#{ctime})
+	</insert>
+	
+</mapper>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.system.batch.dao.BatchDao">
+
+<sql id="where">
+	 	<where>
+	 		<if test="startdate != null and startdate != '' "> and u.ctime <![CDATA[>=]]> #{startdate}</if>
+	 		<if test="enddate != null and enddate != '' "> and u.ctime <![CDATA[<=]]> #{enddate}</if>
+	        <if test="batchname != null and batchname != '' "> and u.name like '%${batchname}%'</if>
+	    </where>
+	</sql>
+
+	<select id="getAll" resultType="com.ets.system.batch.entity.tb_sys_batch">
+		select id,name from tb_sys_batch order by ctime asc
+	</select>
+
+	<select id="getListData" parameterType="map"  resultType="com.ets.system.batch.entity.tb_sys_batch">
+		<!-- <![CDATA[select * from (select * from (select u.*,rownum rn from tb_area u where rownum <= #{page}  and father=#{father} ) where rn > #{limit})     ]]>  -->
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select * from tb_sys_batch u 
+							 <include refid="where"></include> 
+						) u 
+						where rownum <![CDATA[<=]]> #{page}
+                        order by u.ctime asc
+					) 
+					where rn > #{limit}
+				)
+    </select>
+ <!-- 获取总记录数 -->
+    <select id="getCount" parameterType="java.lang.String" resultType="long">
+    	select count(*) from tb_sys_batch u
+ 		<include refid="where"></include> 
+    </select>
+    
+     <insert id="insert" parameterType="com.ets.system.batch.entity.tb_sys_batch">
+        insert into tb_sys_batch values(#{id},#{name},#{describe},#{ctime})
+     </insert>
+     
+     <update id="update" parameterType="com.ets.system.batch.entity.tb_sys_batch">
+     	update tb_sys_batch set name = #{name} where id = #{id}
+     </update>
+     
+     <!-- 删除 -->
+    <delete id="delete" parameterType="java.lang.String">
+        delete from tb_sys_batch where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </delete>
+
+</mapper>

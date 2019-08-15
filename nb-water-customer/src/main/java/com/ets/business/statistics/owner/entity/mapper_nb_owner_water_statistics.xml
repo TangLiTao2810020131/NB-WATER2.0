@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.statistics.owner.dao.OwnerStatisticDao">
+
+	<sql id="where">
+	 	<where>
+	        <if test="imei != null and imei != '' "> and e.watermetercode = #{imei}</if>
+	       	<if test="customercode != null and customercode != '' "> and e.customercode = #{customercode}</if>	 
+	       	<if test="stime != null and stime != '' "> and t.ctime <![CDATA[>=]]> #{stime}</if>
+	 		<if test="etime != null and etime != '' "> and t.ctime <![CDATA[<=]]> #{etime}</if>	 
+	    </where>
+	</sql>
+	
+	<sql id="where1">
+	 	<where>
+	        <if test="imei != null and imei != '' "> and e.watermetercode = #{imei}</if>
+	       	<if test="customercode != null and customercode != '' "> and e.customercode = #{customercode}</if>	 
+	       	<if test="year != null and year != '' "> and t.ctime like '${year}%'</if>
+	    </where>
+	</sql>
+
+
+
+	<insert id="insertOwnerStatistic" parameterType="com.ets.business.statistics.owner.entity.nb_owner_water_statistics">
+		insert into NB_WATER_STATISTICS values(#{id},#{ownerid},#{equipmentid},#{useraccount},#{username},#{degrees},#{residentialid},#{ctime})
+	</insert>
+	
+	<select id="selectOwnerStatisticDay" parameterType="java.lang.String" resultType="com.ets.business.statistics.owner.entity.nb_owner_water_statistics">
+		select *
+		  from (select t.ctime,
+		               t.degrees
+		          from NB_WATER_STATISTICS t
+		          left join nb_watermeter_equipment e
+		            on e.id = t.equipmentid
+		          left join nb_residential_init r
+		            on r.id = t.residentialid
+		         where e.watermetercode = #{imei}
+		         order by t.ctime desc ) tab
+		 where rownum <![CDATA[<=]]> 7  order by tab.ctime
+	</select>
+	
+	<select id="selectOwnerStatisticDayMap" parameterType="java.lang.String" resultType="com.ets.business.statistics.owner.entity.nb_owner_water_statistics">
+		select *
+		  from (select t.ctime,
+		               t.degrees
+		          from NB_WATER_STATISTICS t
+		          left join nb_watermeter_equipment e
+		            on e.id = t.equipmentid
+		          left join nb_residential_init r
+		            on r.id = t.residentialid
+		         where e.watermetercode = #{imei}
+		         order by t.ctime ) tab
+		          where tab.ctime between #{stime} and #{etime} order by tab.ctime
+	</select>
+	
+	<select id="selectOwnerStatisticMonth" parameterType="java.util.Map" resultType="com.ets.business.statistics.owner.entity.nb_owner_water_statistics">
+		select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 7) as ctime
+		  from NB_WATER_STATISTICS t
+		  left join nb_watermeter_equipment e
+		    on e.id = t.equipmentid
+		  left join nb_residential_init r
+		    on r.id = t.residentialid
+		 where e.watermetercode = #{imei}
+		   and t.ctime like '${year}%'
+		 group by SUBSTR(t.ctime, 0, 7)
+		 order by SUBSTR(t.ctime, 0, 7) 
+		
+	</select>
+	
+	<select id="selectOwnerStatisticDayMapPage" parameterType="java.util.Map" resultType="com.ets.business.statistics.owner.entity.nb_owner_water_statistics">
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select substr(t.ctime,0,10) ctime,
+					               t.degrees
+					          from NB_WATER_STATISTICS t
+					          left join nb_watermeter_equipment e
+					            on e.id = t.equipmentid
+					          left join nb_residential_init r
+					            on r.id = t.residentialid
+							 <include refid="where"></include> 
+							 order by t.ctime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+	</select>
+	
+	<select id="getCount" parameterType="java.util.Map" resultType="long">
+		select count(*)
+	  		from NB_WATER_STATISTICS t
+		  left join nb_watermeter_equipment e
+		    on e.id = t.equipmentid
+		  left join nb_residential_init r
+		    on r.id = t.residentialid 
+	 <include refid="where"></include> 
+
+	</select>
+	
+	<select id="selectOwnerStatisticMonthPage" parameterType="java.util.Map" resultType="com.ets.business.statistics.owner.entity.nb_owner_water_statistics">
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+						  select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 7) as ctime
+						      from NB_WATER_STATISTICS t
+						      left join nb_watermeter_equipment e
+						        on e.id = t.equipmentid
+						      left join nb_residential_init r
+						        on r.id = t.residentialid
+							 <include refid="where1"></include> 
+						     group by SUBSTR(t.ctime, 0, 7)
+						     order by SUBSTR(t.ctime, 0, 7) 
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+	</select>
+	
+	<select id="getCountYear" parameterType="java.util.Map" resultType="long">
+						select count(*) from 
+						(
+						  select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 7) as ctime
+						      from NB_WATER_STATISTICS t
+						      left join nb_watermeter_equipment e
+						        on e.id = t.equipmentid
+						      left join nb_residential_init r
+						        on r.id = t.residentialid
+							 <include refid="where1"></include> 
+						     group by SUBSTR(t.ctime, 0, 7)
+						     order by SUBSTR(t.ctime, 0, 7) 
+						) u 
+
+	</select>
+	
+</mapper>

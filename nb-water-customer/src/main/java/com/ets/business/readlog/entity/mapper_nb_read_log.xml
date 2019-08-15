@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.readlog.dao.ReadLogDao">
+
+	<sql id="where">
+	 	<where>
+	 		<if test="id != null and id != '' "> and u.id = #{id}</if>
+	 		<if test="customercode != null and customercode != '' "> and u.customercode = #{customercode}</if>
+	 		<if test="startdate != null and startdate != '' "> and u.ctime <![CDATA[>=]]> #{startdate}</if>
+	 		<if test="enddate != null and enddate != '' "> and u.ctime <![CDATA[<=]]> #{enddate}</if>	 		
+	       	<if test="imei != null and imei != '' "> and u.imei = #{imei}</if>
+	    </where>
+	</sql>
+
+	<insert id="insertReadLog" parameterType="com.ets.business.readlog.entity.nb_read_log">
+		insert into nb_read_log values(#{id},#{content},#{ctime},#{deviceId},#{customercode},#{ipaddress},#{imei})
+	</insert>
+	
+	<!-- 获取列表 -->
+	<select id="selectReadLog" parameterType="map"  resultType="com.ets.business.readlog.entity.nb_read_log">
+<!-- 			<![CDATA[select * from (select u.*,rownum rn from nb_access_dict u where rownum <= #{page} order by u.ctime desc) where rn > #{limit}]]>  -->
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select * from nb_read_log u 
+							<include refid="where"></include>
+							 order by u.ctime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+
+    <!-- 获取总记录数 -->
+    <select id="selectCount" parameterType="map"  resultType="long">
+   	 	select count(*) from nb_read_log u  <include refid="where"></include>
+    </select>	
+    
+    	<!-- 获取列表 -->
+	<select id="info" parameterType="map"  resultType="com.ets.business.readlog.entity.nb_read_log">
+		select * from nb_read_log u  <include refid="where"></include>
+    </select>
+</mapper>

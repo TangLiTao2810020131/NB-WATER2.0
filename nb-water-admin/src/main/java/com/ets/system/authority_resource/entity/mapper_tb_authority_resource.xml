@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.system.authority_resource.dao.AuthorityResourceDao">
+
+<select id="getResourceByAuthorityId" parameterType="java.lang.String" resultType="com.ets.system.authority_resource.entity.tb_authority_resource">
+	select * from tb_authority_resource where authorityId=#{id}
+</select>
+
+<insert id="save" parameterType="com.ets.system.authority_resource.entity.tb_authority_resource">
+        insert into tb_authority_resource values(#{id},#{authorityId},#{resourceId})
+</insert>
+
+<delete id="deleteResourceByAuthorityId" parameterType="java.lang.String">
+	delete from tb_authority_resource where authorityId=#{id}
+</delete>
+
+<select id="getResources" parameterType="java.lang.String" resultType="com.ets.system.resource.entity.tb_resource">
+	select r.* from tb_resource r , tb_authority_resource ar where r.id=ar.resourceId and ar.authorityId=#{authorityId}
+</select>
+
+</mapper>

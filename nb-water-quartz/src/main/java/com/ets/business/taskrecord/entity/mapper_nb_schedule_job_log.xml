@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.taskrecord.dao.ScheduleJobLogDao">
+
+
+    
+    <!-- 新增结算定时任务记录 -->
+    <insert id="insertScheduleJobLog" parameterType="com.ets.business.taskrecord.entity.nb_schedule_job_log">
+        insert into nb_schedule_job_log values(#{id},#{customercode},#{jobid},#{exectime},#{execendtime},#{issuccess},#{message},#{ctime})
+    </insert>
+    
+    <!-- 修改结算定时任务记录 -->
+    <update id="updateScheduleJobLog" parameterType="com.ets.business.taskrecord.entity.nb_schedule_job_log">
+        update nb_schedule_job_log set describe=#{describe},ScheduleJobLogType=#{ScheduleJobLogType},code=#{code} where id=#{id}
+    </update>
+    
+   
+</mapper>

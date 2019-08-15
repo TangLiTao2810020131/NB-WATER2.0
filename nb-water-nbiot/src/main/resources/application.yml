@@ -1,0 +1,50 @@
+server:
+   port: 8380
+   context-path: /nb-water-nbiot
+   
+spring:
+   application:
+      name: microservice-water-nbiot
+   datasource:
+      url: jdbc:oracle:thin:@172.16.1.101:1521:oracle
+      username: WATER
+      password: WATER@123
+      type: com.alibaba.druid.pool.DruidDataSource
+      driverClassName: oracle.jdbc.driver.OracleDriver
+      initialSize: 5
+      minIdle: 5
+      maxActive: 20
+      maxWait: 60000
+      timeBetweenEvictionRunsMillis: 60000
+      minEvictableIdleTimeMillis: 30000
+      validationQuery: select 'x' FROM DUAL
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      poolPreparedStatements: true
+      maxPoolPreparedStatementPerConnectionSize: 20
+      filters: stat,wall,slf4j
+      connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+      useGlobalDataSourceStat: true
+   mvc:
+      view:
+         prefix: /WEB-INF/jsp/
+         suffix: .jsp
+   redis:
+      port: 6379
+      host: 172.168.12.100
+      timeout: 30000
+   jmx:  
+      enabled: false  
+   cloud:
+      nacos:
+       discovery:
+        server-addr: 172.168.12.108:8848
+      
+mybatis:
+   config-location: classpath:mybatis/mybatis-config.xml
+   mapper-locations: classpath:com/ets/**/mapper*.xml
+
+logging:
+   config: classpath:logback.xml
+   

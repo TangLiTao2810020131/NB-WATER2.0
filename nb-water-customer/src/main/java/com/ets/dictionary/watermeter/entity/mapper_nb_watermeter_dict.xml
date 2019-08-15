@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.dictionary.watermeter.dao.WatermeterDao">
+
+
+	<!-- 获取角色权限列表 -->
+	<select id="selectWatermeter" parameterType="map"  resultType="com.ets.dictionary.watermeter.entity.nb_watermeter_dict">
+			<!-- <![CDATA[select * from (select u.*,rownum rn from nb_watermeter_dict u where rownum <= #{page} order by u.ctime desc) where rn > #{limit}]]>  -->
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select * from nb_watermeter_dict u 
+							 <!-- <include refid="where"></include>  -->
+							 order by u.ctime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+    
+    <!-- 获取总记录数 -->
+    <select id="selectCount"  resultType="long">
+    	select count(*) from nb_watermeter_dict
+    </select>
+    
+    <!-- 获取总记录数 -->
+    <select id="selectWatermeterAll"   resultType="com.ets.dictionary.watermeter.entity.nb_watermeter_dict">
+    	select * from nb_watermeter_dict
+    </select>
+
+    <!-- 新增 -->
+    <insert id="insertWatermeter" parameterType="com.ets.dictionary.watermeter.entity.nb_watermeter_dict">
+        insert into nb_watermeter_dict values(#{id},#{code},#{name},#{caliber},#{ratio},#{type},#{describe},#{ctime},#{control},#{magnetism})
+    </insert>
+    
+    <!-- 更新资源 -->
+    <update id="updateWatermeter" parameterType="com.ets.dictionary.watermeter.entity.nb_watermeter_dict">
+        update nb_watermeter_dict set describe=#{describe},name=#{name},code=#{code},caliber=#{caliber},ratio=#{ratio},type=#{type},control=#{control},magnetism=#{magnetism} where id=#{id}
+    </update>
+    
+    <!-- 查看资源 -->
+    <select id="infoWatermeter" resultType="com.ets.dictionary.watermeter.entity.nb_watermeter_dict" parameterType="java.lang.String">
+        select * from nb_watermeter_dict where id=#{id}
+    </select>
+    
+   	<!-- 查询资源 集合-->
+    <select id="infoWatermeterList" resultType="com.ets.dictionary.watermeter.entity.nb_watermeter_dict" parameterType="java.lang.String">
+        select * from nb_watermeter_dict  where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </select>
+
+    <!-- 删除 -->
+    <delete id="deleteWatermeter" parameterType="java.lang.String">
+        delete from nb_watermeter_dict where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </delete>
+    
+    <select id="selectWMTypeCusId" parameterType="map" resultType="com.ets.business.equipment.entity.WMControl">
+  
+		select d.control,d.magnetism,e.deviceid as code from nb_watermeter_equipment e
+		left join nb_watermeter_dict d on e.watermeterid = d.id
+		where e.customercode=#{customerId} 
+		 <if test="watermetercode != null and watermetercode != '' "> and e.watermetercode = #{watermetercode}</if>
+	</select>
+    
+</mapper>

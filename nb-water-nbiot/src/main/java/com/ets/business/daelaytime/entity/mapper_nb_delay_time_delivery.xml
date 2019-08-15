@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.daelaytime.dao.DeliveryDao">
+
+     <!-- 根据客户ID获取设置上报周期命令下发延迟时间 -->
+    <select id="info" resultType="com.ets.business.daelaytime.entity.nb_delay_time_delivery" parameterType="java.lang.String">
+        select * from nb_delay_time_delivery where customerId=#{customerId}
+    </select>
+     
+</mapper>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.equipment.dao.EquipmentDao">
+
+	<!-- 根据设备ID查询客户端水表设备 -->	
+	<select id="selectWMEinfoByDeviceId" parameterType="java.lang.String" resultType="com.ets.business.equipment.entity.nb_watermeter_equipment">
+		select * from nb_watermeter_equipment where deviceid = #{deviceid}
+	</select>
+	
+	<!--  每上报一次就更新设备在线、信号、信噪比等数据 -->
+	<update id="updateOnlinePRS"  parameterType="com.ets.business.equipment.entity.nb_watermeter_equipment">
+		 update nb_watermeter_equipment  
+		  	set isonline=#{isonline},psvoltage=#{psvoltage},rssi=#{rssi},snr=#{snr}
+		 where id=#{id}
+	</update>
+</mapper>

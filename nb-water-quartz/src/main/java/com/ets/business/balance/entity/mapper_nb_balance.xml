@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.balance.dao.BalanceDao">
+
+
+  	
+  	<!-- 查询上月用水量 -->
+  	<select id="selectLastBalance" parameterType="map"  resultType="com.ets.business.balance.entity.nb_balance">
+  		select * from nb_balance t where t.balancemonth = #{lastTime} and watermeterid = #{watermeterid} and customercode = #{customercode}
+  	</select>
+  	
+	<!-- 添加结算记录 -->
+    <insert id="insertBalance" parameterType="com.ets.business.balance.entity.nb_balance">
+        insert into nb_balance values(#{id},#{customercode},#{watermeterid},#{useraccount},#{username},
+  									  #{startnum},#{startnumdate},#{endnum},#{endnumdate},#{balancemonth},#{describe},#{ctime})
+    </insert>
+</mapper>

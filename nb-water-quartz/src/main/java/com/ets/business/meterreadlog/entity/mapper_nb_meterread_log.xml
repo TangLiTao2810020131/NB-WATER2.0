@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.meterreadlog.dao.MeterreadlogDao">
+    
+    
+    <!-- 查询某一天最后一条抄表记录 -->
+    <select id="selectLogByEidTime" resultType="com.ets.business.meterreadlog.entity.nb_meterread_log" parameterType="map">
+		select *
+		  from (
+		  		select *
+		          from NB_METERREAD_LOG t
+		         where t.watermeterid = #{eid}
+		           and t.optiontime like '${time}%'
+		         order by t.optiontime desc
+		        )
+		 where rownum = 1
+    </select>
+    
+    <!--  查询需要结算的月份最后一次的读数 -->
+   	<select id="selectBalanceEndTimeMeterreadLog" resultType="com.ets.business.meterreadlog.entity.nb_meterread_log" parameterType="map">
+      	select *
+			  from (
+			  		select *
+			          from nb_meterread_log
+			         where customercode = #{customerCode}
+			           and watermeterid = #{waterMeterId}
+			           and optiontime <![CDATA[<=]]> '${balanceMonth}'
+			         ORDER BY optiontime DESC
+			        ) tab
+			 where ROWNUM = 1
+    </select>
+    
+</mapper>

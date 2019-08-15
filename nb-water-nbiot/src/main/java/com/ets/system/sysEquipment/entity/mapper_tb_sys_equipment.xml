@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.system.sysEquipment.dao.SysEquipmentDao">
+
+	<sql id="where">
+	 	<where>
+	 		<if test="id != null and id != '' "> and u.id = #{id}</if>
+	 		<if test="startdate != null and startdate != '' "> and u.ctime <![CDATA[>=]]> #{startdate}</if>
+	 		<if test="enddate != null and enddate != '' "> and u.ctime <![CDATA[<=]]> #{enddate}</if>
+	 		<if test="batchid != null and batchid != '' "> and u.batchid = #{batchid}</if>
+	       	<if test="imei != null and imei != '' "> and u.imei like '%${imei}%'</if>
+	    </where>
+	</sql>
+
+	<!-- 获取角色权限列表 -->
+	<select id="selectSysEquipment" parameterType="map"  resultType="com.ets.system.sysEquipment.entity.tb_sys_equipment">
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select * from tb_sys_equipment u 
+							<include refid="where"></include> 
+							order by u.ctime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+    
+    <!-- 获取总记录数 -->
+    <select id="selectCount"  resultType="long" parameterType="map" >
+    	select count(*) from tb_sys_equipment u  <include refid="where"></include>
+    </select>
+	
+    <!-- 新增 -->
+    <insert id="insertSysEquipment" parameterType="com.ets.system.sysEquipment.entity.tb_sys_equipment">
+    
+        insert into tb_sys_equipment values(#{uuid},#{deviceid},#{batchid},#{id},#{imei},#{basenum},#{control},#{cstatus},#{dstatus},#{ctime})
+        
+    </insert>
+    
+    <!-- 更新资源 -->
+    <update id="updateSysEquipment" parameterType="com.ets.system.sysEquipment.entity.tb_sys_equipment">
+    
+        update tb_sys_equipment set imei=#{imei},basenum=#{basenum},control=#{control},deviceid=#{deviceid} where uuid = #{uuid}
+        
+    </update>
+    
+    <!-- 删除 -->
+    <delete id="deleteSysEquipment" parameterType="java.lang.String">
+    
+        delete from tb_sys_equipment where uuid in
+        
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+        
+            #{empnoItem}
+            
+        </foreach>
+        
+    </delete>
+    
+	<!-- 验证唯一性 -->
+	<select id="isCheckIMEI" resultType="java.lang.Integer" parameterType="java.lang.String">
+	
+		select count(*)  from tb_sys_equipment where  imei = #{imei}
+		
+	</select>
+    
+    <update id="updateRemote" parameterType="java.lang.String">
+        update tb_sys_equipment set control = 2 where deviceid=#{deviceid}
+    </update>
+    
+    <select id="selectSysWMEinfoByDeviceId" parameterType="java.lang.String" resultType="com.ets.system.sysEquipment.entity.tb_sys_equipment">
+    	select *  from tb_sys_equipment where  deviceid = #{deviceid}
+    </select>
+    
+    <!-- 关阀-->
+    <update id="close" parameterType="java.lang.String">
+        update tb_sys_equipment set control=0 where DEVICEID=#{deviceId}
+    </update>
+
+    <!-- 缓存-->
+    <update id="open" parameterType="java.lang.String">
+        update tb_sys_equipment set control=1 where DEVICEID=#{deviceId}
+    </update>
+    
+     <!-- 缓存-->
+    <update id="updateCstatus" parameterType="java.lang.String">
+        update tb_sys_equipment set cstatus=1 where DEVICEID=#{deviceId}
+    </update>
+    
+      <!-- 缓存-->
+    <update id="updateDstatus" parameterType="java.lang.String">
+        update tb_sys_equipment set dstatus=1 where DEVICEID=#{deviceId}
+    </update>
+
+	<!-- 查询所属批次的水表个数-->
+	<select id="selectWaterNum" resultType="java.lang.Integer" parameterType="java.lang.String">
+	
+		select count(*)  from tb_sys_equipment where  batchid = #{batchid}
+		
+	</select>
+</mapper>

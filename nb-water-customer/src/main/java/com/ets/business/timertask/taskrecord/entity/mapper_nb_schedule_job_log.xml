@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.timertask.taskrecord.dao.ScheduleJobLogDao">
+
+	<sql id="where">
+	 	<where>
+	 		<if test="customercode != null and customercode != '' "> and u.customercode = #{customercode}</if>
+	 		<if test="startdate != null and startdate != '' "> and u.ctime <![CDATA[>=]]> #{startdate}</if>
+	 		<if test="enddate != null and enddate != '' "> and u.ctime <![CDATA[<=]]> #{enddate}</if>		 		
+	    </where>
+	</sql>
+
+	<select id="selectScheduleJobLog" parameterType="map"  resultType="com.ets.business.timertask.taskrecord.entity.JobLogModel">
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select u.*,j.jobname as jobname from nb_schedule_job_log u 
+							 left join nb_schedule_job j on j.jobid = u.jobid
+							 <include refid="where"></include> 
+							 order by u.ctime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+    
+    
+    <!-- 获取总记录数 -->
+    <select id="selectCount"  resultType="long" parameterType="map">
+							select count(*) from nb_schedule_job_log u 
+							 left join nb_schedule_job j on j.jobid = u.jobid
+							 <include refid="where"></include> 
+							 order by u.ctime desc
+    </select>
+    
+    <!-- 新增 -->
+    <insert id="insertScheduleJobLog" parameterType="com.ets.business.timertask.taskrecord.entity.nb_schedule_job_log">
+        insert into nb_schedule_job_log values(#{id},#{customercode},#{jobid},#{exectime},#{execendtime},#{issuccess},#{message},#{ctime})
+    </insert>
+    
+    <!-- 更新资源 -->
+    <update id="updateScheduleJobLog" parameterType="com.ets.business.timertask.taskrecord.entity.nb_schedule_job_log">
+        update nb_schedule_job_log set describe=#{describe},ScheduleJobLogType=#{ScheduleJobLogType},code=#{code} where id=#{id}
+    </update>
+    
+    <!-- 查看资源 -->
+    <select id="infoScheduleJobLog" resultType="com.ets.business.timertask.taskrecord.entity.nb_schedule_job_log" parameterType="java.lang.String">
+        select * from nb_schedule_job_log where id=#{id}
+    </select>
+    
+    <!-- 查看资源 -->
+    <select id="infoScheduleJobLogList" resultType="com.ets.business.timertask.taskrecord.entity.nb_schedule_job_log" parameterType="java.lang.String">
+        select * from nb_schedule_job_log where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </select>
+
+    <!-- 删除 -->
+    <delete id="deleteScheduleJobLog" parameterType="java.lang.String">
+        delete from nb_schedule_job_log where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </delete>
+    
+        <!-- 查看资源 -->
+    <select id="infoJobLog" resultType="com.ets.business.timertask.taskrecord.entity.nb_schedule_job_log" parameterType="java.lang.String">
+        select * from nb_schedule_job_log where jobid=#{jobid} and customercode=#{customercode} and ctime like '%${ctime}%' and rownum = 1
+    </select>
+</mapper>

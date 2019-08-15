@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.dictionary.district.dao.CityDao">
+
+	<sql id="where">
+	 	<where>
+	        <if test="father != null and father != '' "> and u.father=#{father}</if>
+	    </where>
+	</sql>
+
+<!-- 获取市列表 -->
+	<select id="getCitys" parameterType="map"  resultType="com.ets.dictionary.district.entity.tb_city">
+<!-- 		<![CDATA[select * from (select * from (select u.*,rownum rn from tb_city u where rownum <= #{page}  and father=#{father} ) where rn > #{limit})     ]]>  -->
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select * from tb_city u 
+							 <include refid="where"></include> 
+						) u 
+						where rownum <![CDATA[<=]]> #{page}
+                        order by cityid asc
+					) 
+					where rn > #{limit}
+				)
+    </select>
+ <!-- 获取总记录数 -->
+    <select id="getCount" parameterType="java.lang.String" resultType="long">
+    	select count(*) from tb_city where father=#{father}
+    </select>
+    
+    <!-- 新增省 -->
+     <insert id="addCity" parameterType="com.ets.dictionary.district.entity.tb_city">
+        insert into tb_city values(#{cityid},#{city},#{father},#{id})
+     </insert>
+     
+     <!-- 删除 -->
+    <delete id="deleteCity" parameterType="java.lang.String">
+        delete from tb_city where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </delete>
+    
+    <!-- 更新 -->
+    <update id="updateCity" parameterType="com.ets.dictionary.district.entity.tb_city">
+        update tb_city set cityid=#{cityid},city=#{city} where id=#{id}
+    </update>
+    
+     <!-- 查看 -->
+    <select id="infoCity" resultType="com.ets.dictionary.district.entity.tb_city" parameterType="java.lang.String">
+        select * from tb_city where id=#{id}
+    </select>
+ 
+   <!-- 查看 -->
+    <select id="infoCityid" resultType="com.ets.dictionary.district.entity.tb_city" parameterType="java.lang.String">
+        select * from tb_city where cityid=#{id}
+    </select>
+   
+     <!-- 查询 -->
+    <select id="selectListCitys" resultType="com.ets.dictionary.district.entity.tb_city" parameterType="java.lang.String">
+        select * from tb_city where father=#{father}
+    </select>
+    <!--查询地市对应的省份-->
+    <select id="findProvinceByCode" parameterType="java.lang.String" resultType="com.ets.dictionary.district.entity.tb_province">
+        select * from tb_province where provinceid=#{provinceid}
+    </select>
+
+    <select id="findProvinceIdByCityId" parameterType="java.lang.String" resultType="java.lang.String">
+        select father from tb_city where cityid=#{cityid}
+    </select>
+    <select id="isCkeckCityid" parameterType="java.lang.String" resultType="int">
+        select count(*) from TB_CITY where CITYID=#{cityid}
+    </select>
+    
+         <!-- 查询 -->
+    <select id="selectListCity" resultType="com.ets.dictionary.district.entity.tb_city" parameterType="java.lang.String">
+        select * from tb_city 
+    </select>
+</mapper>

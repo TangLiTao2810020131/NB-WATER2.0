@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--  配置 SecurityManager! -->     
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+     	<property name="sessionManager" ref="sessionManager"/>
+        <property name="cacheManager" ref="customCacheManager"/>
+        <property name="realms" ref="jdbcRealm" />
+        <property name="rememberMeManager.cookie.maxAge" value="10"></property>
+    </bean>
+
+    <!--  配置 CacheManager. 需要加入 ehcache 的 jar 包及配置文件.    
+    <bean id="cacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+        <property name="cacheManagerConfigFile" value="classpath:ehcache.xml"/> 
+    </bean> --> 
+
+    <!-- 配置 Realm 直接配置实现了 org.apache.shiro.realm.Realm 接口的 bean  -->  
+    <bean id="jdbcRealm" class="com.ets.system.shiro.ShiroRealm"> 
+          
+      <!-- 依赖凭证匹配器 
+        <property name="credentialsMatcher" ref="credentialsMatcher"/>-->
+        <!--启用缓存，默认关闭-->
+        <property name="cachingEnabled" value="true"/>
+        <!--启用身份验证缓存，即缓存AuthenticationInfo，默认false-->
+        <property name="authenticationCachingEnabled" value="true"/>
+        <!--启用授权缓存，即缓存AuthorizationInfo的信息，默认为false-->
+        <property name="authorizationCachingEnabled" value="true"/>
+    <!--
+    <property name="securityDao" ref="securityDAO"></property> 
+    	<property name="credentialsMatcher">
+    		<bean class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+    			<property name="hashAlgorithmName" value="MD5"></property> 
+    			<property name="hashIterations" value="1024"></property> 
+    		</bean>
+    	</property>
+    	  -->
+     </bean> 
+
+    <!--  配置 LifecycleBeanPostProcessor. 可以自动的来调用配置在 Spring IOC 容器中 shiro bean 的生命周期方法.  -->       
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+
+    <!-- 启用 IOC 容器中使用 shiro 的注解. 但必须在配置了 LifecycleBeanPostProcessor 之后才可以使用. -->
+       
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+          depends-on="lifecycleBeanPostProcessor">
+          <property name="proxyTargetClass" value="true" />
+          </bean>
+          
+    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager"/>
+    </bean>
+
+    <!--  
+          配置 ShiroFilter. 
+     id 必须和 web.xml 文件中配置的 DelegatingFilterProxy 的 <filter-name> 一致.
+                      若不一致, 则会抛出: NoSuchBeanDefinitionException. 因为 Shiro 会来 IOC 容器中查找和 <filter-name> 名字对应的 filter bean.
+    -->     
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager"/>
+         
+      <!--   <property name="loginUrl" value="/login/login.action"/> -->
+        <!-- <property name="successUrl" value="/jsp/index-2"/>  不使用shrio控制的成功页面-->
+        <property name="unauthorizedUrl" value="/WEB-INF/jsp/unauthorized.jsp"/>
+          
+        <property name="filterChainDefinitionMap" ref="filterChainDefinitionMap"></property>
+    </bean>
+    
+    <!-- 配置一个 bean, 该 bean 实际上是一个 Map. 通过实例工厂方法的方式 -->
+    <bean id="filterChainDefinitionMap" 
+    	factory-bean="filterChainDefinitionMapBuilder" factory-method="buildFilterChainDefinitionMap"></bean>
+    
+    <bean id="filterChainDefinitionMapBuilder" class="com.ets.system.shiro.LoadFilter" />
+    	
+    
+ <!--会话管理器-->
+    <bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+        <!--删除在session过期时跳转页面时自动在URL中添加JSESSIONID-->
+        <property name="sessionIdUrlRewritingEnabled" value="false" />
+        <!-- 设置超时时间 -->
+        <property name="globalSessionTimeout" value="1800000"/>
+        <property name="deleteInvalidSessions" value="true"/>
+        <property name="sessionValidationSchedulerEnabled" value="true"/>
+        <property name="sessionIdCookieEnabled" value="true"/>
+    </bean>
+    
+    <!--这里配置我们自定义的缓存管理器-->
+    <bean id="customCacheManager" class="com.ets.system.shiro.cache.CustomCacheManager"/>
+
+</beans>

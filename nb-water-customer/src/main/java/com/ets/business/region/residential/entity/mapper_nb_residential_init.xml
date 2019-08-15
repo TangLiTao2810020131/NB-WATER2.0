@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.region.residential.dao.ResidentialDao">
+
+	<sql id="where">
+	 	<where>
+	 		<if test="id != null and id != '' "> and u.id = #{id}</if>	        
+	        <if test="areaid != null and areaid != '' "> and u.areacode = #{areaid}</if>
+	       	<if test="customercode != null and customercode != '' "> and u.customercode = #{customercode}</if>	        
+	    </where>
+	</sql>
+
+	<!-- 获取角色权限列表 -->
+	<select id="selectResidential" parameterType="map"  resultType="com.ets.business.region.residential.entity.nb_residential_init">
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select * from nb_residential_init u 
+							 <include refid="where"></include> 
+							order by u.ctime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+    
+    <!-- 获取总记录数 -->
+    <select id="selectCount"  resultType="long" parameterType="map">
+    	select count(*) from nb_residential_init u <include refid="where"></include> 
+    </select>
+    
+    <!-- 新增 -->
+    <insert id="insertResidential" parameterType="com.ets.business.region.residential.entity.nb_residential_init">
+      insert into nb_residential_init values(#{id},
+	  #{inittype},
+	  #{name},
+	  #{provincecode},
+	  #{citycode},
+	  #{areacode},
+	  #{address},
+	  #{customercode},
+	  #{pid},
+	  #{describe},
+	  #{ctime})
+    </insert>
+    
+    <!-- 更新资源 -->
+    <update id="updateResidential" parameterType="com.ets.business.region.residential.entity.nb_residential_init">
+        update nb_residential_init set describe=#{describe},name=#{name},provincecode=#{provincecode},
+	  citycode=#{citycode},areacode=#{areacode},address=#{address},customercode=#{customercode}
+        
+        where id=#{id}
+    </update>
+    
+    <!-- 查看资源 -->
+    <select id="infoResidential" resultType="com.ets.business.region.residential.entity.nb_residential_init" parameterType="java.lang.String">
+        select * from nb_residential_init where id=#{id}
+    </select>
+    
+	<select id="infoResidentialModel" resultType="com.ets.business.region.residential.entity.ResidentialModel" parameterType="java.lang.String">
+		select u.id,u.name, p.province, c.city,u.areacode, a.area, u.address, u.describe
+		  from nb_residential_init u
+		  left join tb_province p
+		    on u.provincecode = p.id
+		  left join tb_city c
+		    on u.citycode = c.id
+		  left join tb_area a
+		    on u.areacode = a.id
+			<include refid="where"></include> 
+	</select>
+
+    <!-- 查看资源 -->
+    <select id="infoResidentialList" resultType="com.ets.business.region.residential.entity.nb_residential_init" parameterType="java.lang.String">
+        select * from nb_residential_init where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </select>
+    <!-- 删除 -->
+    <delete id="deleteResidential" parameterType="java.lang.String">
+        delete from nb_residential_init where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </delete>
+    
+    <!-- 获取角色权限列表 -->
+	<select id="selectListResidential" parameterType="map"  resultType="com.ets.business.region.residential.entity.nb_residential_init">
+			 select * from nb_residential_init where areacode = #{areaid} and  customercode = #{customerId}
+    </select>
+
+	<select id="isCheckName" resultType="java.lang.Integer" parameterType="map">
+		 select count(*) from nb_residential_init where customercode = #{customercode} and  name = #{name} and areacode = #{areacode}
+	</select>
+</mapper>

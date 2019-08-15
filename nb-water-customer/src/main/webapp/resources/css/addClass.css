@@ -1,0 +1,28 @@
+.layui-body{left:10px;}
+.layui-layout-admin .layui-body{bottom:5px; top:0px}
+.grid-demo{padding: 10px; line-height: 50px; text-align: center; background-color: #79C48C; color: #fff;}
+.grid-demo-bg1{background-color: #63BA79;}
+.grid-demo-bg2{background-color: #49A761;}
+.grid-demo-bg3{background-color: #38814A;}
+
+.site-demo-button{margin-bottom: 30px;}
+.site-demo-button div{margin: 20px 30px 10px;}
+.site-demo-button .layui-btn+.layui-btn{margin-left: 0;}
+.site-demo-button .layui-btn{margin: 0 7px 10px 0; }
+
+div[carousel-item]>*{text-align: center; line-height: 280px; color: #fff;}
+div[carousel-item]>*:nth-child(2n){background-color: #009688;}
+div[carousel-item]>*:nth-child(2n+1){background-color: #5FB878;}
+#test2 div[carousel-item]>*{line-height: 120px;}
+
+.flow-default{width: 600px; height: 400px; overflow: auto; font-size: 0;}
+.flow-default li{display: inline-block; margin: 0 5px; font-size: 14px; width: 48%;  margin-bottom: 10px; height: 100px; line-height: 100px; text-align: center; background-color: #eee;}
+.flow-default img{width: 100%; height: 100%;}
+.site-demo-flow{width: 600px; height: 300px; overflow: auto; text-align: center;}
+.site-demo-flow img{width: 40%; height: 200px; margin: 0 2px 5px 0; border: none;}
+
+.height100{ height: 100%;}
+.white-bg{ background-color: #fff;}
+.ztree-box{ position: fixed;top: 52.5px; bottom:46.5px;left: 220px; width: 220px; overflow: auto;}
+.ztree-container{position: absolute;left: 227.5px; right: 0;}
+.ztree-box .layui-card-body{ overflow: auto;}

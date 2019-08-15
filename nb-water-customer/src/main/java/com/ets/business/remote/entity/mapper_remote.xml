@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.remote.dao.RemoteDao">
+
+
+    <sql id="where">
+    <where>
+        d.BUILDINGID = b.ID and b.RESIDENTIALID=i.ID and i.CustomerCode=#{cid} and e.DOORNUMID=d.id and i.areaCode=#{areaId}
+        <if test="imei != null and imei != '' "> and e.watermetercode = #{imei}</if>
+        <if test="useraccount != null and useraccount != '' "> and o.useraccount = #{useraccount}</if>
+        <if test="username != null and username != '' "> and o.username like '%${username}%'</if>
+    </where>
+    </sql>
+
+    <select id="list" parameterType="map"  resultType="com.ets.business.remote.entity.RemoteListEntity">
+			select * from
+							(
+								select * from
+								(
+									select u.*,rownum rn from
+									(
+			        SELECT e.ID wId , d.ID dId ,o.useraccount userCode, o.username userName , o.ID oid ,i.NAME InitName , b.BUILDING , d.DOORNUM ,e.STATUS isFloodgate, e.watermetercode,        (select w.magnetism from nb_watermeter_dict w where e.watermeterid = w.id) as ismagnetism ,e.DEVICEID deviceId from   NB_RESIDENTIAL_BUILDING b , NB_RESIDENTIAL_INIT i , NB_WATERMETER_EQUIPMENT e , NB_RESIDENTIAL_DOOR d LEFT JOIN NB_OWNER o on o.DOORNUMID = d.ID
+			
+			        <include refid="where"></include>
+			    ) u
+						where rownum <![CDATA[<=]]> #{page}
+					)
+					where rn > #{limit}
+				)
+    </select>
+
+    <!-- 获取总记录数 -->
+    <select id="getCount" parameterType="map" resultType="long">
+        SELECT count(*)  from  NB_RESIDENTIAL_BUILDING b , NB_RESIDENTIAL_INIT i , NB_WATERMETER_EQUIPMENT e , NB_RESIDENTIAL_DOOR d LEFT JOIN NB_OWNER o on o.DOORNUMID = d.ID
+        <include refid="where"></include>
+    </select>
+
+    <!-- 开阀-->
+    <update id="open" parameterType="java.lang.String">
+        update NB_WATERMETER_EQUIPMENT set STATUS=1 where DEVICEID=#{deviceId}
+    </update>
+
+    <!-- 关阀-->
+    <update id="close" parameterType="java.lang.String">
+        update NB_WATERMETER_EQUIPMENT set STATUS=0 where DEVICEID=#{deviceId}
+    </update>
+
+    <!-- 缓存-->
+    <update id="updateRemote" parameterType="java.lang.String">
+        update NB_WATERMETER_EQUIPMENT set STATUS=2 where DEVICEID=#{deviceId}
+    </update>
+</mapper>

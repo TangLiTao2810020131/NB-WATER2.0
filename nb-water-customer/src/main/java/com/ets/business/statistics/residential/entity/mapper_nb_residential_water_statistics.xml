@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.statistics.residential.dao.ResidentialStatisticDao">
+
+	<sql id="where">
+	 	<where>
+	       	<if test="stime != null and stime != '' "> and tab.ctime <![CDATA[>=]]> #{stime}</if>
+	 		<if test="etime != null and etime != '' "> and tab.ctime <![CDATA[<=]]> #{etime}</if>
+	    </where>
+	</sql>
+	
+	<sql id="where1">
+	 	<where>
+	        <if test="id != null and id != '' "> and r.id = #{id}</if>
+	       	<if test="customercode != null and customercode != '' "> and e.customercode = #{customercode}</if>	 
+	       	<if test="year != null and year != '' "> and t.ctime like '${year}%'</if>
+	    </where>
+	</sql>
+
+	<sql id="where2">
+		<where>
+			<if test="ldid != null and ldid != '' "> and b.id = #{ldid}</if>
+			<if test="customercode != null and customercode != '' "> and e.customercode = #{customercode}</if>
+			<if test="year != null and year != '' "> and t.ctime like '${year}%'</if>
+		</where>
+	</sql>
+
+	<select id="selectResidentialStatisticDay" parameterType="java.lang.String" resultType="com.ets.business.statistics.residential.entity.nb_residential_water_statistics">
+		select *
+		  from (select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 10) as ctime
+		          from NB_WATER_STATISTICS t
+		          left join nb_watermeter_equipment e
+		            on e.id = t.equipmentid
+		          left join nb_residential_init r
+		            on r.id = t.residentialid
+		         where 1 = 1
+		           and r.id = #{id}
+		         group by SUBSTR(t.ctime, 0, 10)
+		         order by SUBSTR(t.ctime, 0, 10) desc) tab
+		where rownum <![CDATA[<=]]> 7 order by tab.ctime
+	</select>
+	
+	<select id="selectResidentialStatisticDayMap" parameterType="java.util.Map" resultType="com.ets.business.statistics.residential.entity.nb_residential_water_statistics">
+		select *
+		  from (select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 10) as ctime
+		          from NB_WATER_STATISTICS t
+		          left join nb_watermeter_equipment e
+		            on e.id = t.equipmentid
+		          left join nb_residential_init r
+		            on r.id = t.residentialid
+		         where 1 = 1
+		           and r.id = #{id}
+		         group by SUBSTR(t.ctime, 0, 10)) tab
+		where tab.ctime between #{stime} and #{etime} order by tab.ctime
+	</select>
+	
+	<select id="selectResidentialStatisticMonthMap" parameterType="java.util.Map" resultType="com.ets.business.statistics.residential.entity.nb_residential_water_statistics">
+		select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 7) as ctime
+		  from NB_WATER_STATISTICS t
+		  left join nb_watermeter_equipment e
+		    on e.id = t.equipmentid
+		  left join nb_residential_init r
+		    on r.id = t.residentialid
+		 where 1=1 
+		 	and r.id = #{id}
+		   and t.ctime like '${year}%'
+		 group by SUBSTR(t.ctime, 0, 7)
+		 order by SUBSTR(t.ctime, 0, 7)
+		
+	</select>
+	
+	<select id="selectCountDay" parameterType="java.util.Map" resultType="long">
+								select  count(*)
+							  from (select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 10) as ctime
+							          from NB_WATER_STATISTICS t
+							          left join nb_watermeter_equipment e
+							            on e.id = t.equipmentid
+							          left join nb_residential_init r
+							            on r.id = t.residentialid
+							         where 1 = 1
+							           and r.id = #{id}
+									   and e.customercode = #{customercode}
+							         group by SUBSTR(t.ctime, 0, 10)) tab
+							<include refid="where"></include>
+	</select>
+	
+	<select id="selectResidentialStatisticDayPage" parameterType="java.util.Map" resultType="com.ets.business.statistics.residential.entity.nb_residential_water_statistics">
+
+					select * from
+					(
+						select u.*,rownum rn from
+						(
+							select *
+							  from (select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 10) as ctime
+							          from NB_WATER_STATISTICS t
+							          left join nb_watermeter_equipment e
+							            on e.id = t.equipmentid
+							          left join nb_residential_init r
+							            on r.id = t.residentialid
+							         where 1 = 1
+							           and r.id = #{id}
+									   and e.customercode = #{customercode}
+							         group by SUBSTR(t.ctime, 0, 10)) tab
+							 <include refid="where"></include>
+							order by tab.ctime desc
+						) u
+						where rownum <![CDATA[<=]]> #{page}
+					)
+					where rn > #{limit}
+	</select>
+
+	<select id="selectCountYear" parameterType="java.util.Map" resultType="long">
+		select count(*) from
+			(
+				select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 7) as ctime
+				from NB_WATER_STATISTICS t
+				left join nb_watermeter_equipment e
+				on e.id = t.equipmentid
+				left join nb_residential_init r
+				on r.id = t.residentialid
+				<include refid="where1"></include>
+				group by SUBSTR(t.ctime, 0, 7)
+				order by SUBSTR(t.ctime, 0, 7)
+		) u
+	</select>
+
+	<select id="selectResidentialStatisticMonthPage" parameterType="java.util.Map" resultType="com.ets.business.statistics.residential.entity.nb_residential_water_statistics">
+			select * from
+					(
+						select u.*,rownum rn from
+							(
+								select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 7) as ctime
+								  from NB_WATER_STATISTICS t
+								  left join nb_watermeter_equipment e
+									on e.id = t.equipmentid
+								  left join nb_residential_init r
+									on r.id = t.residentialid
+								<include refid="where1"></include>
+								 group by SUBSTR(t.ctime, 0, 7)
+								 order by SUBSTR(t.ctime, 0, 7) desc
+						) u
+					where rownum <![CDATA[<=]]> #{page}
+				)
+			where rn > #{limit}
+	</select>
+
+	<select id="selectLDStatistic" parameterType="java.util.Map" resultType="com.ets.business.statistics.residential.entity.LdModel">
+		select * from
+			(
+			select u.*, rownum rn from
+				(
+					select tab.*, b.* from (
+						select sum(t.degrees) as degrees, b.id as ldid
+								  from NB_WATER_STATISTICS t
+								  left join nb_watermeter_equipment e
+									on e.id = t.equipmentid
+								  left join nb_residential_init r
+									on r.id = t.residentialid
+								  left join NB_RESIDENTIAL_BUILDING b
+									on r.id = b.residentialid
+								<include refid="where1"></include>
+								 group by b.id
+						) tab
+						left join NB_RESIDENTIAL_BUILDING b
+							on tab.ldid = b.id
+				  ) u
+				where rownum <![CDATA[<=]]> #{page}
+			)
+		where rn > #{limit}
+	</select>
+
+	<select id="selectLDCount"  parameterType="java.util.Map" resultType="long">
+
+		select count(*)  from (
+			select sum(t.degrees) as degrees, b.id as ldid
+			  from NB_WATER_STATISTICS t
+			  left join nb_watermeter_equipment e
+				on e.id = t.equipmentid
+			  left join nb_residential_init r
+				on r.id = t.residentialid
+			  left join NB_RESIDENTIAL_BUILDING b
+				on r.id = b.residentialid
+			<include refid="where1"></include>
+			 group by b.id
+		) tab
+	</select>
+
+	<select id="selectLDStatisticDayPage" parameterType="java.util.Map" resultType="com.ets.business.statistics.residential.entity.nb_residential_water_statistics">
+		select * from
+		(
+			select u.*,rownum rn from
+			(
+				select * from
+					(
+						select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 10) as ctime
+						from NB_WATER_STATISTICS t
+						left join nb_watermeter_equipment e
+						on e.id = t.equipmentid
+						left join nb_residential_init r
+						on r.id = t.residentialid
+						left join NB_RESIDENTIAL_BUILDING b
+						on r.id = b.residentialid
+						where 1 = 1
+						and e.customercode = #{customercode}
+						and b.id = #{ldid}
+						group by SUBSTR(t.ctime, 0, 10)
+					) tab
+				<include refid="where"></include>
+				order by tab.ctime desc
+			) u
+			where rownum <![CDATA[<=]]> #{page}
+		)
+		where rn > #{limit}
+	</select>
+
+	<select id="selectLDCountDay" parameterType="java.util.Map" resultType="long">
+
+		select count(*) from
+			(
+				select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 10) as ctime
+				from NB_WATER_STATISTICS t
+				left join nb_watermeter_equipment e
+				on e.id = t.equipmentid
+				left join nb_residential_init r
+				on r.id = t.residentialid
+				left join NB_RESIDENTIAL_BUILDING b
+				on r.id = b.residentialid
+				where 1 = 1
+				and e.customercode = #{customercode}
+				and b.id = #{ldid}
+				group by SUBSTR(t.ctime, 0, 10)
+			) tab
+		<include refid="where"></include>
+
+	</select>
+
+	<select id="selectLDStatisticMonthPage" parameterType="java.util.Map" resultType="com.ets.business.statistics.residential.entity.nb_residential_water_statistics">
+		select * from
+		(
+			select u.*,rownum rn from
+			(
+				select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 7) as ctime
+				  from NB_WATER_STATISTICS t
+				  left join nb_watermeter_equipment e
+					on e.id = t.equipmentid
+				  left join nb_residential_init r
+					on r.id = t.residentialid
+				  left join NB_RESIDENTIAL_BUILDING b
+					on r.id = b.residentialid
+				<include refid="where2"></include>
+				 group by SUBSTR(t.ctime, 0, 7)
+				 order by SUBSTR(t.ctime, 0, 7) desc
+			  ) u
+			where rownum <![CDATA[<=]]> #{page}
+		)
+		where rn > #{limit}
+	</select>
+
+	<select id="selectLDCountYear" parameterType="java.util.Map" resultType="long">
+		select count(*) from
+		(
+			select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 7) as ctime
+				from NB_WATER_STATISTICS t
+				left join nb_watermeter_equipment e
+				on e.id = t.equipmentid
+				left join nb_residential_init r
+				on r.id = t.residentialid
+				left join NB_RESIDENTIAL_BUILDING b
+				on r.id = b.residentialid
+			<include refid="where2"></include>
+			group by SUBSTR(t.ctime, 0, 7)
+			order by SUBSTR(t.ctime, 0, 7) desc
+		) u
+	</select>
+
+
+	<select id="selectLDStatisticDay" parameterType="java.lang.String" resultType="com.ets.business.statistics.residential.entity.nb_residential_water_statistics">
+		select *
+		  from (select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 10) as ctime
+						from NB_WATER_STATISTICS t
+						left join nb_watermeter_equipment e
+						on e.id = t.equipmentid
+						left join nb_residential_init r
+						on r.id = t.residentialid
+						left join NB_RESIDENTIAL_BUILDING b
+						on r.id = b.residentialid
+						where 1 = 1
+						and b.id = #{ldid}
+		         group by SUBSTR(t.ctime, 0, 10)
+		         order by SUBSTR(t.ctime, 0, 10) desc) tab
+		where rownum <![CDATA[<=]]> 7 order by tab.ctime
+	</select>
+
+	<select id="selectLDStatisticDayMap" parameterType="java.util.Map" resultType="com.ets.business.statistics.residential.entity.nb_residential_water_statistics">
+		select *
+		  from (select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 10) as ctime
+						from NB_WATER_STATISTICS t
+						left join nb_watermeter_equipment e
+						on e.id = t.equipmentid
+						left join nb_residential_init r
+						on r.id = t.residentialid
+						left join NB_RESIDENTIAL_BUILDING b
+						on r.id = b.residentialid
+						where 1 = 1
+						and b.id = #{ldid}
+		         group by SUBSTR(t.ctime, 0, 10)) tab
+		where tab.ctime between #{stime} and #{etime} order by tab.ctime
+	</select>
+
+
+	<select id="selectLDStatisticMonth" parameterType="java.util.Map" resultType="com.ets.business.statistics.residential.entity.nb_residential_water_statistics">
+		select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 7) as ctime
+						from NB_WATER_STATISTICS t
+						left join nb_watermeter_equipment e
+						on e.id = t.equipmentid
+						left join nb_residential_init r
+						on r.id = t.residentialid
+						left join NB_RESIDENTIAL_BUILDING b
+						on r.id = b.residentialid
+						where 1 = 1
+						and b.id = #{ldid}
+		   and t.ctime like '${year}%'
+		 group by SUBSTR(t.ctime, 0, 7)
+		 order by SUBSTR(t.ctime, 0, 7)
+
+	</select>
+</mapper>

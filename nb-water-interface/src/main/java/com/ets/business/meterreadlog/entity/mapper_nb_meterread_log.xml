@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.meterreadlog.dao.MeterreadlogDao">
+
+	<!-- 根据客户id查询水表的历史抄表记录 -->
+	<select id="selectWMLatestNumCusId"
+		resultType="com.ets.business.meterreadlog.entity.nb_meterread_log"
+		parameterType="map">
+		select t.* from nb_meterread_log t
+		left join nb_watermeter_equipment e
+		on e.id = t.watermeterid
+		where t.customercode = #{customerId}
+		<if test="watermetercode != null and watermetercode != '' "> and e.watermetercode = #{watermetercode}</if>
+		<if test="startDate != null and startDate != '' ">
+			and t.optiontime <![CDATA[>=]]>
+			#{startDate}
+		</if>
+		<if test="endDate != null and endDate != '' ">
+			and t.optiontime <![CDATA[<=]]>
+			#{endDate}
+		</if>
+	</select>
+
+
+
+</mapper>

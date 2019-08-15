@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.region.door.dao.DoorDao">
+
+	<sql id="where">
+	 	<where>
+	       	<if test="buildid != null and buildid != '' "> and u.buildingid = #{buildid}</if>
+	       	<if test="customercode != null and customercode != '' "> and u.customercode = #{customercode}</if>
+	    </where>
+	</sql>
+
+	<!-- 获取角色权限列表 -->
+	<select id="selectDoor" parameterType="map"  resultType="com.ets.business.region.door.entity.nb_residential_door">
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select * from nb_residential_door u 
+							 <include refid="where"></include> 
+							order by u.ctime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+    
+    <!-- 获取总记录数 -->
+    <select id="selectCount"  resultType="long" parameterType="map">
+    	select count(*) from nb_residential_door u  <include refid="where"></include> 
+    </select>
+    
+    <!-- 新增 -->
+    <insert id="insertDoor" parameterType="com.ets.business.region.door.entity.nb_residential_door">
+      insert into nb_residential_door values(#{id},
+      #{buildingid},
+	  #{customercode},
+	  #{doornum},
+	  #{describe},
+	  #{ctime})
+    </insert>
+    
+    <!-- 更新资源 -->
+    <update id="updateDoor" parameterType="com.ets.business.region.door.entity.nb_residential_door">
+        update nb_residential_door set describe=#{describe},buildingid=#{buildingid}
+        ,doornum=#{doornum} where id=#{id}
+    </update>
+    
+    <!-- 查看资源 -->
+    <select id="infoDoor" resultType="com.ets.business.region.door.entity.nb_residential_door" parameterType="java.lang.String">
+        select * from nb_residential_door where id=#{id}
+    </select>
+    
+    <!-- 查看资源 -->
+    <select id="infoDoorList" resultType="com.ets.business.region.door.entity.nb_residential_door" parameterType="java.lang.String">
+        select * from nb_residential_door where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </select>
+    <!-- 删除 -->
+    <delete id="deleteDoor" parameterType="java.lang.String">
+        delete from nb_residential_door where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </delete>
+    
+    <select id="selectListDoor" resultType="com.ets.business.region.door.entity.nb_residential_door" parameterType="map">
+    	 select * from nb_residential_door where buildingid = #{buildingid} and customercode = #{customercode}
+    </select>
+    
+    <select id="selectOwnerDoor" resultType="java.lang.String" parameterType="map">
+    	select o.doornumid
+		  from nb_owner o
+		  left join nb_residential_door d
+		    on o.doornumid = d.id
+		  left join nb_residential_building b
+		    on b.id = d.buildingid
+		 where o.customercode = #{customercode}
+		   and b.id = #{buildingid}
+    </select>
+
+    <select id="selectEquipmentDoor" resultType="java.lang.String" parameterType="map">
+    	select o.doornumid
+		  from nb_watermeter_equipment o
+		  left join nb_residential_door d
+		    on o.doornumid = d.id
+		  left join nb_residential_building b
+		    on b.id = d.buildingid
+		 where o.customercode = #{customercode}
+		   and b.id = #{buildingid}
+    </select>
+    
+    <select id="isCheckDoor" resultType="java.lang.Integer" parameterType="map">
+    	 select COUNT(*) from nb_residential_door where buildingid = #{buildingid} and customercode = #{customercode} and doornum = #{doornum}
+    </select>
+    
+    <select id="selectListDoorId" resultType="java.lang.String" parameterType="map">
+    	 select id from nb_residential_door where buildingid = #{buildingid} and customercode = #{customercode}
+    </select>
+</mapper>

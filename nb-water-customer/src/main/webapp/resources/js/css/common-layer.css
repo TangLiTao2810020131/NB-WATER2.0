@@ -1,0 +1,74 @@
+/*
+* @Author: zz
+* @Date:   2018-09-5 
+* 
+*/
+/*普通的表单*/
+.layui-form-label{
+	overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.label-120{
+	width: 120px;
+}
+.unit_{
+  	margin-top: 10px;display: inline-block;
+}
+.marginL{
+  	margin-left: -41px;
+}
+/*导入、下载模板*/
+ .import-msg{
+  	padding: 50px 250px;
+  }
+
+ .bottomBtn {
+ 	position: relative;
+ 	top: 150px;
+ }
+ #import{
+ 	margin-left: 50px;
+ }
+ #importBtn{
+ 	position: absolute;
+ 	top: 10px;
+ 	right: 140px;
+ }
+ #cancelBtn{
+ 	position: absolute;
+ 	top: 10px;
+ 	right: 50px;
+}
+ /*参数设置   */
+.parm .dun{
+	float: left;
+	padding: 9px 10px 9px 0px;
+}
+.parm .layui-input{
+	padding-left: 0px;
+	text-align: center;
+}
+.parm .layui-form-item .layui-input-inline{
+	width: 120px;
+}
+.parm .layui-form-item .layui-inline{
+	width: 385px;
+}
+.parms .layui-form-item .layui-inline{
+	width: 320px;
+}
+.parm .layui-form-label{
+	width: 165px;
+}
+.parm .layui-form-label{
+	width: 150px;
+}
+
+/*弹窗样式   */
+.window-leg{font-size: 16px!important;}
+.window-block-btn{ position:absolute; width:100%; right:0; bottom:0; border-top: 1px solid #e6e6e6; padding-top: 8px; bottom: 0px;padding-right: 10px;}
+.window-btn{float: right; display: block;}
+.window-btn+.window-btn{margin-right: 10px;}
+.ml30{margin-left: 30px;}
+.layui-form-pane .layui-form-text .w650{width: 650px;}

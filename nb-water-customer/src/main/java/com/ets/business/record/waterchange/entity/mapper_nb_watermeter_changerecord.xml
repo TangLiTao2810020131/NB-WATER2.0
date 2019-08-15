@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.record.waterchange.dao.WaterchangeDao">
+
+<sql id="where">
+ 	<where> 
+ 			<if test="customerId != null and customerId != '' "> and u.customercode = #{customerId}</if>
+	 		<if test="startdate != null and startdate != '' "> and u.ctime <![CDATA[>=]]> #{startdate}</if>
+	 		<if test="enddate != null and enddate != '' "> and u.ctime <![CDATA[<=]]> #{enddate}</if>
+	 		<if test="useraccount != null and useraccount != '' "> and u.useraccount like '%${useraccount}%'</if>
+	 		<if test="idcard != null and idcard != '' "> and u.idcard = #{idcard}</if>
+     </where>
+</sql>
+
+	<!-- 获取角色权限列表 -->
+	<select id="selectWaterchange" parameterType="map"  resultType="com.ets.business.record.waterchange.entity.nb_watermeter_changerecord">
+<!-- 			<![CDATA[select * from (select u.*,rownum rn from nb_watermeter_changerecord u where rownum <= #{page} order by u.ctime desc) where rn > #{limit}]]>  -->
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select u.*, cu.username as optionusername from nb_watermeter_changerecord u 
+							  left join nb_customer_user cu
+							  	on cu.id = u.optionuser
+							  <include refid="where"></include>  
+							 order by u.ctime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+    
+    <!-- 获取总记录数 -->
+    <select id="selectCount" parameterType="map"  resultType="long">
+    	select count(*) from nb_watermeter_changerecord u 
+							  left join nb_customer_user cu
+							  	on cu.id = u.optionuser
+							  	 <include refid="where"></include>  
+    </select>
+    
+    <!-- 新增 -->
+    <insert id="insertWaterchange" parameterType="com.ets.business.record.waterchange.entity.nb_watermeter_changerecord">
+        insert into nb_watermeter_changerecord values(#{id},#{customercode},#{useraccount},#{username},#{address},
+        #{oldwatermetercode},#{oldbasenum},#{newwatermetercode},#{newbasenum},#{phone},#{optionuser},#{changtime},#{changreason},
+        #{describe},#{ctime},#{idcard})
+    </insert>
+   
+   <select id="infoWaterchange" parameterType="map"  resultType="com.ets.business.record.waterchange.entity.nb_watermeter_changerecord">
+			   	select u.*, cu.realname as optionusername
+			  from nb_watermeter_changerecord u
+			  left join nb_customer_user cu
+			    on cu.id = u.optionuser
+			   where  u.id = #{id} and u.customercode = #{customerId}
+   </select>
+</mapper>

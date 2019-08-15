@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.equipment.dao.EquipmentDao">
+
+	<sql id="where">
+	 	<where>
+	 		<if test="areacode != null and areacode != '' "> and r.areacode = #{areacode}</if>
+	 		<if test="customercode != null and customercode != '' "> and t.customercode = #{customercode}</if>
+	 		<if test="startdate != null and startdate != '' "> and t.ctime <![CDATA[>=]]> #{startdate}</if>
+	 		<if test="enddate != null and enddate != '' "> and t.ctime <![CDATA[<=]]> #{enddate}</if>		 		
+	       	<if test="watermetercode != null and watermetercode != '' "> and t.watermetercode = #{watermetercode}</if>
+	       	<if test="status != null and status != '' "> and t.status = #{status}</if>	
+	       	<if test="isonline != null and isonline != '' "> and t.isonline = #{isonline}</if>	       	
+	    </where>
+	</sql>
+	<sql id="where1">
+	 	<where>
+	 		<if test="id != null and id != '' "> and t.id = #{id}</if>
+	 		<if test="customercode != null and customercode != '' "> and t.customercode = #{customercode}</if>
+	       	<if test="doornumid != null and doornumid != '' "> and t.doornumid = #{doornumid}</if>
+	    </where>
+	</sql>
+
+	<sql id="whereCheck">
+		<where>
+			<if test="customercode != null and customercode != '' "> and customercode = #{customercode}</if>
+			<if test="watermetercode != null and watermetercode != '' "> and watermetercode = #{watermetercode}</if>
+		</where>
+	</sql>
+	<!-- 获取角色权限列表 -->
+	<select id="selectEquipment" parameterType="map"  resultType="com.ets.business.equipment.entity.EquipmentModel">
+			select * from 
+			(
+				select u.*,rownum rn from 
+				(
+					select t.id,
+					       t.watermetercode,
+					       w.type,
+					       t.basenum,
+					       t.optionuser,
+					       t.status,
+					       p.province || c.city || a.area || r.name || b.building || '栋' ||
+					       d.doornum || '室' address,
+					       t.installdate,
+					       t.isonline,
+					       t.psvoltage,
+					       t.rssi,
+					       t.snr,
+					       t.describe,
+					       t.ctime
+					  from NB_WATERMETER_EQUIPMENT t
+					  left join nb_watermeter_dict w
+					    on t.watermeterid = w.id
+					  left join nb_residential_door d
+					    on d.id = t.doornumid
+					  left join nb_residential_building b
+					    on b.id = d.buildingid
+					  left join nb_residential_init r
+					    on r.id = b.residentialid
+					  left join tb_province p
+					    on p.id = r.provincecode
+					  left join tb_city c
+					    on c.id = r.citycode
+					  left join tb_area a
+					    on a.id = r.areacode
+					    <include refid="where"></include> 
+					 order by t.ctime desc
+	
+	   			) u where rownum <![CDATA[<=]]> #{page} 
+   			) where rn > #{limit}
+    </select>
+    
+    <!-- 获取总记录数 -->
+    <select id="selectCount"  resultType="long">
+    	select count(*)
+					  from NB_WATERMETER_EQUIPMENT t
+					  left join nb_watermeter_dict w
+					    on t.watermeterid = w.id
+					  left join nb_residential_door d
+					    on d.id = t.doornumid
+					  left join nb_residential_building b
+					    on b.id = d.buildingid
+					  left join nb_residential_init r
+					    on r.id = b.residentialid
+					  left join tb_province p
+					    on p.id = r.provincecode
+					  left join tb_city c
+					    on c.id = r.citycode
+					  left join tb_area a
+					    on a.id = r.areacode
+					     <include refid="where"></include> 
+    </select>
+    
+    <!-- 获取总记录数 -->
+    <select id="infoEquipmentM"   resultType="com.ets.business.equipment.entity.EquipmentModel" parameterType="map">
+
+					select t.id,
+					       t.watermetercode,
+					       w.type || '(口径:' || w.caliber || case
+					         when w.control = '0' then
+					          ',无'
+					         when w.control = '1' then
+					          ',有'
+					       end || '阀控）' as type,
+					       t.basenum,
+					       cu.username as optionuser,
+					       t.status,
+					       p.province || c.city || a.area || r.name || b.building || '栋' ||
+					       d.doornum || '室' address,
+					       t.installdate,
+					       t.describe,
+					       t.deviceid,
+					       t.isonline,
+					       t.psvoltage,
+					       t.rssi,
+					       t.snr,
+					       t.doornumid,
+					       t.ctime
+					  from NB_WATERMETER_EQUIPMENT t
+					  left join nb_customer_user cu
+   						on cu.id = t.optionuser
+					  left join nb_watermeter_dict w
+					    on t.watermeterid = w.id
+					  left join nb_residential_door d
+					    on d.id = t.doornumid
+					  left join nb_residential_building b
+					    on b.id = d.buildingid
+					  left join nb_residential_init r
+					    on r.id = b.residentialid
+					  left join tb_province p
+					    on p.id = r.provincecode
+					  left join tb_city c
+					    on c.id = r.citycode
+					  left join tb_area a
+					    on a.id = r.areacode
+					  <include refid="where1"></include> 
+    </select>
+    
+    <!-- 新增 -->
+    <insert id="insertEquipment" parameterType="com.ets.business.equipment.entity.nb_watermeter_equipment">
+        insert into nb_watermeter_equipment(id,customercode,watermetercode,watermeterid,basenum,optionuser,operationmode,status,productiondate,
+       									    productionnum,installdate,describe,ctime,doornumid,deviceid,isonline) 
+       								 values(#{id},#{customercode},#{watermetercode},#{watermeterid},#{basenum},#{optionuser},#{operationmode},#{status},#{productiondate},
+       										#{productionnum},#{installdate},#{describe},#{ctime},#{doornumid},#{deviceid},#{isonline})
+    </insert>
+    
+    <!-- 更新资源 -->
+    <update id="updateEquipment" parameterType="com.ets.business.equipment.entity.nb_watermeter_equipment">
+        update nb_watermeter_equipment 
+        set describe=#{describe},
+        watermeterid=#{watermeterid},
+        basenum=#{basenum},
+        optionuser=#{optionuser},
+        operationmode=#{operationmode},
+        status=#{status},
+        productiondate=#{productiondate},
+        productionnum=#{productionnum},
+        installdate=#{installdate},
+        deviceid=#{deviceid}
+         where id=#{id}
+    </update>
+    
+    <!-- 查看资源 -->
+    <select id="infoEquipment" resultType="com.ets.business.equipment.entity.nb_watermeter_equipment" parameterType="map">
+        select * from nb_watermeter_equipment t <include refid="where1"></include> 
+    </select>
+    
+    <!-- 查看资源 -->
+    <select id="infoEquipmentList" resultType="com.ets.business.equipment.entity.nb_watermeter_equipment" parameterType="java.lang.String">
+        select * from nb_watermeter_equipment where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </select>
+
+    <!-- 删除 -->
+    <delete id="deleteEquipment" parameterType="java.lang.String">
+        delete from nb_watermeter_equipment where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </delete>
+    
+   <!-- 查看水表信息 -->
+    <select id="selectEquipmentList" resultType="com.ets.business.equipment.entity.nb_watermeter_equipment" parameterType="java.lang.String">
+        select * from nb_watermeter_equipment where customercode=#{customerId}
+    </select>
+
+	<!-- 验证唯一性 -->
+	<select id="isCheckIMEI" resultType="java.lang.Integer" parameterType="map">
+		select count(*)  from nb_watermeter_equipment <include refid="whereCheck"></include>
+	</select>
+	
+	<select id="selectWMEinfoByDeviceId" parameterType="java.lang.String" resultType="com.ets.business.equipment.entity.nb_watermeter_equipment">
+		select * from nb_watermeter_equipment where deviceid = #{deviceid}
+	</select>
+	
+	<select id="selectEquipmentDoorId" parameterType="map" resultType="com.ets.business.equipment.entity.nb_watermeter_equipment">
+		select * from nb_watermeter_equipment where customercode=#{customerId} and doornumid = #{doornumid}
+	</select>
+	
+	<select id="selectWaterMeterCusId" parameterType="map" resultType="com.ets.business.equipment.entity.nb_watermeter_equipment">
+		select * from nb_watermeter_equipment where customercode=#{customerId} 
+		 <if test="watermetercode != null and watermetercode != '' "> and watermetercode = #{watermetercode}</if>
+	</select>
+	
+	<select id="selectWMControlCusId" parameterType="map" resultType="com.ets.business.equipment.entity.WMControl">
+		select id,watermetercode as imei,status as Control,ctime from nb_watermeter_equipment 
+		where customercode=#{customerId} 
+		 <if test="watermetercode != null and watermetercode != '' "> and watermetercode = #{watermetercode}</if>
+	</select>
+	
+	<select id="selectWaterNum" resultType="java.lang.Integer" parameterType="map">
+		select count(*) from nb_watermeter_equipment where customercode=#{customercode} 
+	</select>
+	
+	<update id="updateOnlinePRS"  parameterType="com.ets.business.equipment.entity.nb_watermeter_equipment">
+		 update nb_watermeter_equipment  
+		  	set isonline=#{isonline},psvoltage=#{psvoltage},rssi=#{rssi},snr=#{snr}
+		 where id=#{id}
+	</update>
+	
+	<update id="updateOnline"  parameterType="com.ets.business.equipment.entity.nb_watermeter_equipment">
+		 update nb_watermeter_equipment  
+		  	set isonline=#{isonline}
+		 where id=#{id}
+	</update>
+</mapper>

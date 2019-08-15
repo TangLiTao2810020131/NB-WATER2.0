@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.dictionary.district.dao.ProvinceDao">
+
+<!-- 获取省列表 -->
+	<select id="getProvinces" parameterType="map"  resultType="com.ets.dictionary.district.entity.tb_province">
+		<!-- <![CDATA[select * from (select u.*,rownum rn from tb_province u where rownum <= #{page} ) where rn > #{limit}]]>  -->
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select * from tb_province u 
+							 <!-- <include refid="where"></include>  -->
+						) u 
+						where rownum <![CDATA[<=]]> #{page}
+                        order by provinceid asc
+					) 
+					where rn > #{limit}
+				)
+    </select>
+     
+     <!-- 获取总记录数 -->
+    <select id="getCount"  resultType="long">
+    	select count(*) from tb_province 
+    </select>
+    
+     <!-- 新增省 -->
+     <insert id="addProvince" parameterType="com.ets.dictionary.district.entity.tb_province">
+        insert into tb_province values(#{provinceid},#{province},#{id})
+     </insert>
+     
+     <!-- 删除 -->
+    <delete id="deleteProvince" parameterType="java.lang.String">
+        delete from tb_province where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </delete>
+    
+    <!-- 更新 -->
+    <update id="updateProvince" parameterType="com.ets.dictionary.district.entity.tb_province">
+        update tb_province set provinceid=#{provinceid},province=#{province} where id=#{id}
+    </update>
+    
+     <!-- 查看 -->
+    <select id="infoProvince" resultType="com.ets.dictionary.district.entity.tb_province" parameterType="java.lang.String">
+        select * from tb_province where id=#{id}
+    </select>
+    
+    <!-- 查看 -->
+    <select id="infoProvinceid" resultType="com.ets.dictionary.district.entity.tb_province" parameterType="java.lang.String">
+        select * from tb_province where provinceid=#{id}
+    </select>
+ 
+     <!-- 查看 -->
+    <select id="selectTreeProvince" resultType="com.ets.dictionary.district.entity.tb_province" parameterType="java.lang.String">
+        <![CDATA[select * from tb_province order by id ]]> 
+    </select>
+
+    <select id="isCkeckProvinceid" parameterType="java.lang.String" resultType="int">
+        select count(*) from tb_province where provinceid=#{provinceid}
+    </select>
+</mapper>

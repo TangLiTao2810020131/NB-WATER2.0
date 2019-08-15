@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.dictionary.pay.dao.PayDao">
+
+
+	<!-- 获取角色权限列表 -->
+	<select id="selectPay" parameterType="map"  resultType="com.ets.dictionary.pay.entity.nb_pay_dict">
+			<!-- <![CDATA[select * from (select u.*,rownum rn from NB_PAY_DICT u where rownum <= #{page} ) where rn > #{limit}]]> --> 
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select * from NB_PAY_DICT u 
+							 <!-- <include refid="where"></include>  -->
+							 order by u.ctime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+ 
+    <!-- 获取总记录数 -->
+    <select id="selectPayAll"  resultType="com.ets.dictionary.pay.entity.nb_pay_dict">
+    	select * from NB_PAY_DICT
+    </select>
+       
+    <!-- 获取总记录数 -->
+    <select id="selectCount"  resultType="long">
+    	select count(*) from NB_PAY_DICT
+    </select>
+    
+    <!-- 新增 -->
+    <insert id="insertPay" parameterType="com.ets.dictionary.pay.entity.nb_pay_dict">
+        insert into NB_PAY_DICT values(#{id},#{dictype},#{code},#{paymode},#{describe},#{ctime},#{remarks})
+    </insert>
+    
+    <!-- 更新资源 -->
+    <update id="updatePay" parameterType="com.ets.dictionary.pay.entity.nb_pay_dict">
+        update NB_PAY_DICT set describe=#{describe},paymode=#{paymode},code=#{code} where id=#{id}
+    </update>
+    
+    <!-- 查看资源 -->
+    <select id="infoPay" resultType="com.ets.dictionary.pay.entity.nb_pay_dict" parameterType="java.lang.String">
+        select * from NB_PAY_DICT where id=#{id}
+    </select>
+    
+        <!-- 查看资源 -->
+    <select id="infoPayList" resultType="com.ets.dictionary.pay.entity.nb_pay_dict" parameterType="java.lang.String">
+        select * from NB_PAY_DICT where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </select>
+
+    <!-- 删除 -->
+    <delete id="deletePay" parameterType="java.lang.String">
+        delete from NB_PAY_DICT where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </delete>
+
+    <!--查看个数-->
+    <select id="fingPayDictype" parameterType="java.lang.String" resultType="long">
+        select count(*) from NB_PAY_DICT where paymode=#{paymode}
+    </select>
+</mapper>

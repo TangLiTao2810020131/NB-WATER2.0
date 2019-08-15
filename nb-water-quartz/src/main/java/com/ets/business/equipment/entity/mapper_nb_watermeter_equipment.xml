@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.equipment.dao.EquipmentDao">
+
+	
+	<!-- 更新水表为离线状态 -->
+	<update id="updateOnline"  parameterType="com.ets.business.equipment.entity.nb_watermeter_equipment">
+		 update nb_watermeter_equipment  
+		  	set isonline=#{isonline}
+		 where id=#{id}
+	</update>
+	
+	<!-- 根据水表ID查询水表信息 -->
+    <select id="infoEquipment" resultType="com.ets.business.equipment.entity.nb_watermeter_equipment" parameterType="map">
+        select * from nb_watermeter_equipment t where t.id = #{id}
+    </select>
+	
+	<!-- 根据客户ID查询该客户所有相关水表 -->
+    <select id="selectEquipmentList" resultType="com.ets.business.equipment.entity.nb_watermeter_equipment" parameterType="java.lang.String">
+        select * from nb_watermeter_equipment where customercode=#{customerId}
+    </select>
+</mapper>

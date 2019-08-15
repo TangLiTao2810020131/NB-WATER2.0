@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.owner.dao.OwnerDao">
+	<sql id="where1">
+	 	<where>
+	 		<if test="id != null and id != '' "> and o.id = #{id}</if>
+	 		<if test="customercode != null and customercode != '' "> and o.customercode = #{customercode}</if>
+	       	<if test="doornumid != null and doornumid != '' "> and o.doornumid = #{doornumid}</if>
+	    </where>
+	</sql>
+	
+    <!-- 根据customercode和doornumid查询业主信息 -->
+    <select id="ownerInfo" resultType="com.ets.business.owner.entity.OwnerModel" parameterType="map" >
+			select o.id,
+			       o.useraccount,
+			       o.username,
+			       o.documenttype,
+			       o.idnum,
+			       o.phone,
+			       o.sex,
+			       payd.paymode as operationmode,
+			       pd.type || '-(' || pd.price || '元/吨)' as type,
+			       p.province || c.city || a.area || r.name || rb.building || '栋' || rd.doornum || '室' as address,
+			       o.doornumid,
+			       o.describe
+			  from NB_OWNER o
+			  left join nb_pay_dict payd 
+			  	on payd.id = o.operationmode
+			  left join nb_price_dic pd
+			    on pd.id = o.userunitprice
+			  left join nb_residential_door rd
+			    on rd.id = o.doornumid
+			  left join nb_residential_building rb
+			    on rb.id = rd.buildingid
+			  left join nb_residential_init r
+			    on r.id = rb.residentialid
+			  left join tb_province p
+			    on p.id = r.provincecode
+			  left join tb_city c
+			    on c.id = r.citycode
+			  left join tb_area a
+			    on a.id = r.areacode
+			   <include refid="where1"></include>   
+    </select>
+</mapper>

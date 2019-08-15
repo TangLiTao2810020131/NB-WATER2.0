@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.fileupload.dao.FileUploadDao">
+
+
+    <sql id="where">
+        <where>
+            <!--mysql数据库
+            <if test="oprtime != null and oprtime != '' "> and oprtime like CONCAT('%',#{oprtime},'%')</if>
+            <if test="username != null and username != '' "> and username like CONCAT('%',#{username},'%')</if>
+            -->
+            <!--oracle数据库-->
+
+            <if test="uploader != null and uploader != '' "> and uploader like '%${uploader}%'</if>
+            <if test="filename != null and filename != '' "> and filename like '%${filename}%'</if>
+            <if test="uploadtime != null and uploadtime != '' "> and uploadtime like '%${uploadtime}%'</if>
+        </where>
+    </sql>
+
+    <!--新增上传文件信息-->
+    <insert id="addFileRecord" parameterType="com.ets.business.fileupload.entity.FileUpload">
+         insert into tb_fileupload values(#{id},#{uploader},#{uploadtime},#{filename},#{filesize},#{fileurl})
+     </insert>
+
+    <!--通过时间查找最新的文件路径-->
+    <select id="findUrlByNewTime" resultType="com.ets.business.fileupload.entity.FileUpload">
+        select * from tb_fileupload where uploadtime=(select max(uploadtime) uploadtime from tb_fileupload)
+    </select>
+
+    <!-- 分页列表 -->
+    <select id="getDatas" parameterType="map" resultType="com.ets.business.fileupload.entity.FileUpload">
+        select * from
+        (
+        select * from
+        (
+        select u.*,rownum rn from
+        (
+        select * from TB_FILEUPLOAD u
+        <include refid="where"></include>
+        order by u.uploadtime desc
+        ) u
+        where rownum <![CDATA[<=]]> #{page}
+        )
+        where rn > #{limit}
+        )
+    </select>
+
+    <!-- 获取总记录数 -->
+    <select id="getCount" parameterType="map" resultType="long">
+        select count(*) from TB_FILEUPLOAD
+        <include refid="where"></include>
+    </select>
+
+</mapper>

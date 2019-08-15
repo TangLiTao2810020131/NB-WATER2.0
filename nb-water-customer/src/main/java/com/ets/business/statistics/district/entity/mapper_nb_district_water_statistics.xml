@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.statistics.district.dao.DistrictStatisticDao">
+
+
+	<sql id="where">
+	 	<where>
+	       	<if test="stime != null and stime != '' "> and tab.ctime <![CDATA[>=]]> #{stime}</if>
+	 		<if test="etime != null and etime != '' "> and tab.ctime <![CDATA[<=]]> #{etime}</if>
+	    </where>
+	</sql>
+	
+	<sql id="where1">
+	 	<where>
+	        <if test="areacode != null and areacode != '' "> and r.areacode = #{areacode}</if>
+	       	<if test="customercode != null and customercode != '' "> and e.customercode = #{customercode}</if>	 
+	       	<if test="year != null and year != '' "> and t.ctime like '${year}%'</if>
+	    </where>
+	</sql>
+
+	<select id="selectDistrictStatisticDay" parameterType="java.lang.String" resultType="com.ets.business.statistics.district.entity.nb_district_water_statistics">
+		select *
+		  from (select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 10) as ctime
+		          from NB_WATER_STATISTICS t
+		          left join nb_watermeter_equipment e
+		            on e.id = t.equipmentid
+		          left join nb_residential_init r
+		            on r.id = t.residentialid
+		         where 1 = 1
+		           and r.areacode = #{areacode}
+		       	   group by SUBSTR(t.ctime, 0, 10)
+		           order by SUBSTR(t.ctime, 0, 10) desc) tab
+		where rownum <![CDATA[<=]]> 7
+	</select>
+	
+	<select id="selectDistrictStatisticDayMap" parameterType="java.util.Map" resultType="com.ets.business.statistics.district.entity.nb_district_water_statistics">
+		select *
+		  from (select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 10) as ctime
+		          from NB_WATER_STATISTICS t
+		          left join nb_watermeter_equipment e
+		            on e.id = t.equipmentid
+		          left join nb_residential_init r
+		            on r.id = t.residentialid
+		         where 1 = 1
+		           and r.areacode = #{areacode}
+		         group by SUBSTR(t.ctime, 0, 10)) tab
+		where tab.ctime between #{stime} and #{etime} order by tab.ctime
+	</select>
+	
+	<select id="selectDistrictStatisticMonth" parameterType="java.util.Map" resultType="com.ets.business.statistics.district.entity.nb_district_water_statistics">
+		select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 7) as ctime
+		  from NB_WATER_STATISTICS t
+		  left join nb_watermeter_equipment e
+		    on e.id = t.equipmentid
+		  left join nb_residential_init r
+		    on r.id = t.residentialid
+		 where 1=1 
+		 	and r.areacode = #{areacode}
+		   and t.ctime like '${year}%'
+		 group by SUBSTR(t.ctime, 0, 7)
+		 order by SUBSTR(t.ctime, 0, 7)
+	</select>
+	
+
+	<select id="selectDistrictStatisticDayPage" parameterType="java.util.Map" resultType="com.ets.business.statistics.district.entity.nb_district_water_statistics">
+		
+				select * from
+					(
+						select u.*,rownum rn from
+						(
+							select *
+							  from (select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 10) as ctime
+							          from NB_WATER_STATISTICS t
+							          left join nb_watermeter_equipment e
+							            on e.id = t.equipmentid
+							          left join nb_residential_init r
+							            on r.id = t.residentialid
+							         where 1 = 1
+							           and r.areacode = #{areacode}
+							           and e.customercode = #{customercode}
+							         group by SUBSTR(t.ctime, 0, 10)) tab
+							<include refid="where"></include>
+							order by tab.ctime desc
+						) u
+						where rownum <![CDATA[<=]]> #{page}
+					)
+					where rn > #{limit}
+	</select>
+	
+	<select id="getCountDay" parameterType="java.util.Map" resultType="long">
+		select count(*) 
+		  from (
+		  	select 
+		  		sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 10) as ctime
+			          from NB_WATER_STATISTICS t
+			          left join nb_watermeter_equipment e
+			            on e.id = t.equipmentid
+			          left join nb_residential_init r
+			            on r.id = t.residentialid
+			         where 1 = 1
+			           and r.areacode = #{areacode}
+			           and e.customercode = #{customercode}
+			         group by SUBSTR(t.ctime, 0, 10) 
+		    ) tab
+			<include refid="where"></include>
+	</select>
+	
+	<select id="selectDistrictStatisticMonthPage" parameterType="java.util.Map" resultType="com.ets.business.statistics.district.entity.nb_district_water_statistics">
+			select * from
+				(
+					select u.*,rownum rn from
+						(
+								select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 7) as ctime
+								  from NB_WATER_STATISTICS t
+								  left join nb_watermeter_equipment e
+								    on e.id = t.equipmentid
+								  left join nb_residential_init r
+								    on r.id = t.residentialid
+								<include refid="where1"></include>
+								 group by SUBSTR(t.ctime, 0, 7)
+								 order by SUBSTR(t.ctime, 0, 7) desc
+						) u
+					where rownum <![CDATA[<=]]> #{page}
+				)
+			where rn > #{limit}
+	</select>
+	
+	<select id="getCountYear" parameterType="java.util.Map" resultType="long">
+					select count(*) from
+						(
+								select sum(t.degrees) as degrees, SUBSTR(t.ctime, 0, 7) as ctime
+								  from NB_WATER_STATISTICS t
+								  left join nb_watermeter_equipment e
+								    on e.id = t.equipmentid
+								  left join nb_residential_init r
+								    on r.id = t.residentialid
+								<include refid="where1"></include>
+								 group by SUBSTR(t.ctime, 0, 7)
+								 order by SUBSTR(t.ctime, 0, 7)
+						) u
+	</select>
+</mapper>

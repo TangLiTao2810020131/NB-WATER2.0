@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+	<mapper namespace="com.ets.system.log.opr.dao.LogOprDao">
+
+	<sql id="where">
+		<where>
+			<!--mysql数据库
+			<if test="oprtime != null and oprtime != '' "> and oprtime like CONCAT('%',#{oprtime},'%')</if>
+			<if test="username != null and username != '' "> and username like CONCAT('%',#{username},'%')</if>
+			-->
+			<!--oracle数据库-->
+			<if test="oprtime != null and oprtime != '' "> and oprtime like '%${oprtime}%'</if>
+			<if test="username != null and username != '' "> and username like '%${username}%'</if>
+		</where>
+	</sql>
+
+	<!-- 分页列表 -->
+	<select id="getLogs" parameterType="map" resultType="com.ets.system.log.opr.entity.tb_log_opr">
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from
+						(
+							select * from tb_log_opr u
+							 <include refid="where"></include>
+							order by u.oprtime desc
+						) u
+						where rownum <![CDATA[<=]]> #{page}
+					)
+					where rn > #{limit}
+				)
+	</select>
+
+	<!-- 获取总记录数 -->
+	<select id="getCount" parameterType="map" resultType="long">
+		select count(*) from tb_log_opr
+		<include refid="where"></include>
+	</select>
+
+	<!-- 新增 -->
+	<insert id="addLog" parameterType="com.ets.system.log.opr.entity.tb_log_opr">
+		insert into tb_log_opr
+		values(#{id},#{modulename},#{username},#{oprcontent},#{oprtime})
+	</insert>
+
+	<!-- 查看 -->
+	<select id="infoLog" resultType="com.ets.system.log.opr.entity.tb_log_opr"
+		parameterType="java.lang.String">
+		select * from tb_log_opr where id=#{id}
+	</select>
+
+
+
+
+	<!-- 新增 -->
+	<insert id="addCustomerLog" parameterType="com.ets.system.log.opr.entity.tb_log_opr">
+		insert into NB_LOG_OPR_CUSTOMER
+		values(#{id},#{modulename},#{username},#{oprcontent},#{oprtime})
+	</insert>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</mapper>

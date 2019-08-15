@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ets.business.timertask.task.dao.TimerTaskMapper">
+
+
+	<select id="selectByPrimaryKey" resultType="com.ets.business.timertask.task.entity.nb_schedule_job"
+		parameterType="java.lang.String">
+		select
+		*
+		from nb_schedule_job
+		where jobid = #{jobid}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from
+		nb_schedule_job
+		where job_id = #{jobid}
+	</delete>
+	<insert id="insert" parameterType="com.ets.business.timertask.task.entity.nb_schedule_job">
+		insert into nb_schedule_job
+		(
+			jobid,
+			customercode,
+			jobname, 
+			jobgroup, 
+			jobstatus,
+			cronexpression,
+			description, 
+			beanclass,
+			isconcurrent,
+			springid,
+			methodname,
+			executordate,
+			createtime,
+			updatetime
+		)
+		values 
+		(
+			#{jobid},
+			#{customercode},
+			#{jobname},
+			#{jobgroup},
+			#{jobstatus},
+			#{cronexpression},
+			#{description},
+			#{beanclass},
+			#{isconcurrent},
+			#{springid},
+			#{methodname},
+			#{executordate},
+			#{createtime},
+			#{updatetime}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.ets.business.timertask.task.entity.nb_schedule_job">
+		insert into nb_schedule_job
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="jobid != null">
+				jobid,
+			</if>
+			<if test="customercode != null">
+				customercode,
+			</if>
+			<if test="createtime != null">
+				createtime,
+			</if>
+			<if test="updatetime != null">
+				updatetime,
+			</if>
+			<if test="jobname != null">
+				jobname,
+			</if>
+			<if test="jobgroup != null">
+				jobgroup,
+			</if>
+			<if test="jobstatus != null">
+				jobstatus,
+			</if>
+			<if test="cronexpression != null">
+				cronexpression,
+			</if>
+			<if test="description != null">
+				description,
+			</if>
+			<if test="beanclass != null">
+				beanclass,
+			</if>
+			<if test="isconcurrent != null">
+				isconcurrent,
+			</if>
+			<if test="springid != null">
+				springid,
+			</if>
+			<if test="methodname != null">
+				methodname,
+			</if>
+			<if test="methodname != null">
+				executordate,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="jobid != null">
+				#{jobid},
+			</if>
+			<if test="customercode != null">
+				#{customercode},
+			</if>
+			<if test="createtime != null">
+				#{createtime},
+			</if>
+			<if test="updatetime != null">
+				#{updatetime},
+			</if>
+			<if test="jobname != null">
+				#{jobname},
+			</if>
+			<if test="jobgroup != null">
+				#{jobgroup},
+			</if>
+			<if test="jobstatus != null">
+				#{jobstatus},
+			</if>
+			<if test="cronexpression != null">
+				#{cronexpression},
+			</if>
+			<if test="description != null">
+				#{description},
+			</if>
+			<if test="beanclass != null">
+				#{beanclass},
+			</if>
+			<if test="isconcurrent != null">
+				#{isconcurrent},
+			</if>
+			<if test="springid != null">
+				#{springid},
+			</if>
+			<if test="methodname != null">
+				#{methodname},
+			</if>
+			<if test="methodname != null">
+				#{executordate},
+			</if>			
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.ets.business.timertask.task.entity.nb_schedule_job">
+		update nb_schedule_job
+		<set>
+			<if test="createtime != null">
+				createtime = #{createtime},
+			</if>
+			<if test="updatetime != null">
+				updatetime = #{updatetime},
+			</if>
+			<if test="jobname != null">
+				jobname = #{jobname},
+			</if>
+			<if test="jobgroup != null">
+				jobgroup = #{jobgroup},
+			</if>
+			<if test="jobstatus != null">
+				jobstatus = #{jobstatus},
+			</if>
+			<if test="cronexpression != null">
+				cronexpression = #{cronexpression},
+			</if>
+			<if test="description != null">
+				description = #{description},
+			</if>
+			<if test="beanclass != null">
+				beanclass = #{beanclass},
+			</if>
+			<if test="isconcurrent != null">
+				isconcurrent = #{isconcurrent},
+			</if>
+			<if test="springid != null">
+				springid = #{springid},
+			</if>
+			<if test="methodname != null">
+				methodname = #{methodname},
+			</if>
+			<if test="executordate != null">
+				executordate = #{executordate},
+			</if>			
+		</set>
+		where jobid = #{jobid}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.ets.business.timertask.task.entity.nb_schedule_job">
+		update
+		nb_schedule_job
+		set createtime = #{createtime},
+		updatetime =
+		#{updatetime},
+		jobname =
+		#{jobname},
+		jobgroup = #{jobgroup},
+		jobstatus
+		= #{jobstatus},
+		cronexpression =
+		#{cronexpression},
+		description =
+		#{description},
+		beanclass =
+		#{beanclass},
+		isconcurrent =
+		#{isconcurrent},
+		springid =
+		#{springid},
+		methodname =
+		#{methodname},
+		executordate = 
+		#{executordate}
+		where jobid = #{jobid}
+	</update>
+	<select id="getAll" resultType="com.ets.business.timertask.task.entity.nb_schedule_job" >
+		select
+		*
+		from nb_schedule_job
+	</select>
+	<select id="getAllMap" resultType="com.ets.business.timertask.task.entity.nb_schedule_job" parameterType="map">
+		select
+		*
+		from nb_schedule_job where  customercode = #{customercode}
+	</select>
+
+	<select id="infoJob" parameterType="map" resultType="com.ets.business.timertask.task.entity.nb_schedule_job">
+		select
+		*
+		from nb_schedule_job where 1 = 1 and customercode =	#{customercode}
+	</select>
+
+	<!-- 验证唯一性 -->
+	<select id="isCkeckJobName" resultType="java.lang.Integer"
+		parameterType="map">
+		select count(*) from nb_schedule_job job where job.jobname = #{jobname} and
+		customercode = #{customercode}
+	</select>
+</mapper>

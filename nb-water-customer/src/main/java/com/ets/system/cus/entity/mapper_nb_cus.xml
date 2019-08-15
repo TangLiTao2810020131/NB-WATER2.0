@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.system.cus.dao.CusDao">
+
+	<sql id="where">
+	 	<where>
+	 		<if test="startdate != null and startdate != '' "> and u.ctime <![CDATA[>=]]> #{startdate}</if>
+	 		<if test="enddate != null and enddate != '' "> and u.ctime <![CDATA[<=]]> #{enddate}</if>		 		
+	       	<if test="customerName != null and customerName != '' "> and u.customerName  like '%${customerName}%'</if>
+	        <if test="customerStatus != null and customerStatus != '' "> and u.customerStatus = #{customerStatus}</if>
+	    </where>
+	</sql>
+
+	<!-- 列表 -->
+	<select id="getCustomers" parameterType="map"  resultType="com.ets.system.cus.entity.nb_cus">
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select * from nb_customer u 
+							 <include refid="where"></include>
+							order by u.ctime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+     
+     <!-- 获取总记录数 -->
+    <select id="getCount"  resultType="long">
+    	select count(*) from nb_customer 
+    </select>
+
+    
+    <!-- 新增 -->
+     <insert id="addCustomer" parameterType="com.ets.system.cus.entity.nb_cus">
+        insert into nb_customer values(#{id},#{customerName},#{customerStatus},#{ctime},#{remarks},#{linkman},#{tel},#{email},#{address},#{secretkey},#{maxNum})
+     </insert>
+     
+      <!-- 删除 -->
+    <delete id="deleteCustomer" parameterType="java.lang.String">
+        delete from nb_customer where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </delete>
+    
+     <!-- 更新 -->
+    <update id="updateCustomer" parameterType="com.ets.system.cus.entity.nb_cus">
+        update nb_customer set customerName=#{customerName},customerStatus=#{customerStatus},remarks=#{remarks},linkman=#{linkman},tel=#{tel},email=#{email},address=#{address},maxNum=#{maxNum} where id=#{id}
+    </update>
+    
+     <!-- 查看 -->
+    <select id="infoCustomer" resultType="com.ets.system.cus.entity.nb_cus" parameterType="java.lang.String">
+        select * from nb_customer where id=#{id}
+    </select>
+	<!--验证客户名称的唯一性-->
+	<select id="isCheckCustomerName" parameterType="java.lang.String" resultType="long">
+		select count(*) from NB_CUSTOMER where CUSTOMERNAME=#{customerName}
+	</select>
+
+    
+    <select id="selectCustomerByName" resultType="com.ets.system.cus.entity.nb_cus" parameterType="java.lang.String">
+        select * from nb_customer where customerName=#{customerName}
+    </select>
+    
+    <select id="selectCusByKey" resultType="com.ets.system.cus.entity.nb_cus" parameterType="java.lang.String">
+        select * from nb_customer where secretkey = #{secretkey}
+    </select>
+</mapper>

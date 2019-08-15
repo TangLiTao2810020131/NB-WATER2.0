@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.system.authority.dao.AuthorityDao">
+
+<!-- 获取全部权限列表 -->
+	<select id="getAuthoritys" parameterType="map"  resultType="com.ets.system.authority.entity.tb_authority">
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select * from tb_authority u 
+							 <!-- <include refid="where"></include> --> 
+							order by u.ctime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+    
+    <!-- 获取总记录数 -->
+    <select id="getCount"  resultType="long">
+    	select count(*) from tb_authority
+    </select>
+    
+    <!-- 新增 -->
+     <insert id="addAuthority" parameterType="com.ets.system.authority.entity.tb_authority">
+        insert into tb_authority values(#{id},#{authorityname},#{descr},to_date(#{ctime},'yyyy-MM-dd HH24:mi:ss'))
+
+     </insert>
+     
+     <!-- 删除 -->
+    <delete id="deleteAuthority" parameterType="java.lang.String">
+        delete from tb_authority where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </delete>
+    
+    <!-- 更新资源 -->
+    <update id="updateAuthority" parameterType="com.ets.system.authority.entity.tb_authority">
+        update tb_authority set descr=#{descr},authorityname=#{authorityname} where id=#{id}
+    </update>
+    
+    <!-- 查看资源 -->
+    <select id="infoAuthority" resultType="com.ets.system.authority.entity.tb_authority" parameterType="java.lang.String">
+        select * from tb_authority where id=#{id}
+    </select>
+    
+    <select id="getAllAuthority"   resultType="com.ets.system.authority.entity.tb_authority">
+        select * from tb_authority order by ctime desc 
+    </select>
+   <!-- 查看权限名称的个数-->
+    <select id="findAuthority" resultType="long" parameterType="java.lang.String">
+        select count(*) from TB_AUTHORITY where authorityname=#{authorityname}
+    </select>
+     
+</mapper>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.system.user_role.dao.UserRoleDao">
+
+<!-- 根据用户ID返回该用户对应的角色 -->
+<select id="getRoleByUserId" parameterType="java.lang.String" resultType="com.ets.system.user_role.entity.tb_user_role">
+	select * from tb_user_role where userId=#{id}
+</select>
+
+<insert id="save" parameterType="com.ets.system.user_role.entity.tb_user_role">
+        insert into tb_user_role values(#{id},#{roleId},#{userId})
+</insert>
+
+<delete id="deleteRoleByUserId" parameterType="java.lang.String">
+	delete from tb_user_role where userId=#{id}
+</delete>
+
+<!-- 根据用户ID，查看该用户拥有的角色名称 -->
+<select id="getRoleNameByUserId" parameterType="java.lang.String"   resultType="java.lang.String">
+	select r.rolename from tb_role r ,tb_user_role ur where r.id=ur.roleId and ur.userId=#{userId}
+</select>
+
+<!-- 根据用户ID，返回该用户用户的角色对象集合 -->
+<select id="getRoles" parameterType="java.lang.String"   resultType="com.ets.system.role.entity.tb_role">
+	select r.* from tb_role r ,tb_user_role ur where r.id=ur.roleId and ur.userId=#{userId}
+</select>
+
+
+</mapper>

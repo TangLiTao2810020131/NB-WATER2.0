@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.system.cus.dao.CusDao">
+
+	<!-- 根据客户秘钥查询客户信息 -->
+    <select id="selectCusByKey" resultType="com.ets.system.cus.entity.nb_cus" parameterType="java.lang.String">
+        select * from nb_customer where secretkey = #{secretkey}
+    </select>
+</mapper>

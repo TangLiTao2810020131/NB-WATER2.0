@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.region.building.dao.BuildingDao">
+
+	<sql id="where">
+	 	<where>
+	       	<if test="residentialid != null and residentialid != '' "> and u.residentialid = #{residentialid}</if>
+	       	<if test="customercode != null and customercode != '' "> and u.customercode = #{customercode}</if>
+	    </where>
+	</sql>
+
+	<!-- 获取角色权限列表 -->
+	<select id="selectBuilding" parameterType="map"  resultType="com.ets.business.region.building.entity.nb_residential_building">
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select * from nb_residential_building u 
+							 <include refid="where"></include> 
+							order by u.ctime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+    
+    <!-- 获取总记录数 -->
+    <select id="selectCount"  resultType="long" parameterType="map">
+    	select count(*) from nb_residential_building u <include refid="where"></include> 
+    </select>
+    
+    <!-- 新增 -->
+    <insert id="insertBuilding" parameterType="com.ets.business.region.building.entity.nb_residential_building">
+      insert into nb_residential_building values(#{id},
+      #{customercode},
+	  #{residentialid},
+	  #{building},
+	  #{describe},
+	  #{ctime})
+    </insert>
+    
+    <!-- 更新资源 -->
+    <update id="updateBuilding" parameterType="com.ets.business.region.building.entity.nb_residential_building">
+        update nb_residential_building set describe=#{describe},building=#{building} where id=#{id}
+    </update>
+    
+    <!-- 查看资源 -->
+    <select id="infoBuilding" resultType="com.ets.business.region.building.entity.nb_residential_building" parameterType="java.lang.String">
+        select * from nb_residential_building where id=#{id}
+    </select>
+    
+    <!-- 查看资源 -->
+    <select id="infoBuildingList" resultType="com.ets.business.region.building.entity.nb_residential_building" parameterType="java.lang.String">
+        select * from nb_residential_building where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </select>
+    <!-- 删除 -->
+    <delete id="deleteBuilding" parameterType="java.lang.String">
+        delete from nb_residential_building where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </delete>
+    
+    <select id="selectListBuilding"  resultType="com.ets.business.region.building.entity.nb_residential_building" parameterType="map">
+    	 select * from nb_residential_building where residentialid = #{residentialid} and customercode=#{customercode}
+    </select>
+    
+	<select id="getTreeBuilding"  parameterType="map"  resultType="com.ets.business.region.building.entity.nb_residential_building">
+		 select * from nb_residential_building where customercode = #{customercode} and residentialid = #{residentialid}
+	</select>
+	
+	<select id="isCheckbuilding"  parameterType="map"  resultType="java.lang.Integer">
+		 select COUNT(*) from nb_residential_building where customercode = #{customercode} and residentialid = #{residentialid} and building = #{building}
+	</select>
+	
+	<select id="selectListBuildId"  resultType="java.lang.String" parameterType="map">
+    	 select id from nb_residential_building where residentialid = #{residentialid} and customercode=#{customercode}
+    </select>
+</mapper>

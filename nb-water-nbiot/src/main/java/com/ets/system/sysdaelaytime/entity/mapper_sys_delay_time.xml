@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.system.sysdaelaytime.dao.SysDelayTimeDao">
+
+	<select id="selectSysDaelayTime" resultType="com.ets.system.sysdaelaytime.entity.sys_delay_time">
+		select * from TB_SYS_DELAY_TIME t
+	</select>
+	
+	<update id="update" parameterType="com.ets.system.sysdaelaytime.entity.sys_delay_time">
+	
+	 update TB_SYS_DELAY_TIME set basicnumtime=#{basicnumtime},deliverytime=#{deliverytime},valvecontroltime=#{valvecontroltime} where id = #{id}
+	
+	</update>
+     
+</mapper>

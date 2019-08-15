@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.meterread.dao.MeterreadDao">
+
+	 <!-- 新增抄表记录 -->
+     <insert id="insertMeterread" parameterType="com.ets.business.meterread.entity.nb_meterread">
+        insert into nb_meterread values(#{id},#{watermeterid},#{value},#{type},#{optionuser},#{ctime},#{customercode},#{optiontime})
+     </insert>
+     
+     <!-- 根据水表ID查询抄表记录-->
+    <select id="infoMeterReadByWaterID" resultType="com.ets.business.meterread.entity.nb_meterread" parameterType="map" >
+        select * from nb_meterread m where m.watermeterid = #{id}
+    </select>
+    
+    <!-- 根据客户ID和水表ID查询该水表最新抄表数据 -->
+	<select id="queryMeterRead" resultType="com.ets.business.meterread.entity.nb_meterread" parameterType="map" >
+	 select * from nb_meterread m where m.watermeterid = #{watermeterid} and m.customercode = #{customercode}
+	</select>
+</mapper>

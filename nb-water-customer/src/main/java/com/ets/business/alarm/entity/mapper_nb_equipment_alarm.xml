@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.alarm.dao.EquipmentAlarmDao">
+
+	<sql id="where">
+	 	<where>
+	 		<if test="id != null and id != '' "> and u.id = #{id}</if>
+	 		<if test="customercode != null and customercode != '' "> and u.customercode = #{customercode}</if>
+	 		<if test="startdate != null and startdate != '' "> and u.alarmtime <![CDATA[>=]]> #{startdate}</if>
+	 		<if test="enddate != null and enddate != '' "> and u.alarmtime <![CDATA[<=]]> #{enddate}</if>
+	       	<if test="useraccount != null and useraccount != '' "> and u.useraccount = #{useraccount}</if>
+	       	<if test="watermetercode != null and watermetercode != '' "> and u.watermetercode = #{watermetercode}</if>
+	       	<if test="alarmtype != null and alarmtype != '' "> and u.alarmtype = #{alarmtype}</if>
+	    </where>
+	</sql>
+	
+	<!-- 获取设备告警列表 -->
+	<select id="selectAlarm" parameterType="map"  resultType="com.ets.business.alarm.entity.nb_equipment_alarm">
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select * from nb_equipment_alarm u 
+							 <include refid="where"></include>
+							 order by u.alarmtime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+    
+    <!-- 获取总记录数 -->
+    <select id="selectCount" parameterType="map"  resultType="long">
+		select count(*) from nb_equipment_alarm u  <include refid="where"></include>
+    </select>
+    
+    <!-- 新增 -->
+    <insert id="insertAlarm" parameterType="com.ets.business.alarm.entity.nb_equipment_alarm">
+   		insert into NB_EQUIPMENT_ALARM 
+   		(ID, CUSTOMERCODE, USERACCOUNT, USERNAME, ADDRESS, WATERMETERCODE, ALARMTYPE, ALARMSTATUS, ALARMTIME, CTIME)
+		values
+		(#{id}, #{customercode}, #{useraccount}, #{username}, #{address}, #{watermetercode}, #{alarmtype}, #{alarmstatus}, #{alarmtime}, #{ctime})
+    </insert>
+    
+ 
+  	<select id="infoAlarm" parameterType="map"  resultType="com.ets.business.alarm.entity.nb_equipment_alarm">
+		select * from NB_EQUIPMENT_ALARM u  <include refid="where"></include>
+  	</select>
+</mapper>

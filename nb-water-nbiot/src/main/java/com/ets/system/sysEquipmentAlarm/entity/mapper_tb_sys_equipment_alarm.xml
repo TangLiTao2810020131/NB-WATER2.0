@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.system.sysEquipmentAlarm.dao.SysEquipmentAlarmDao">
+
+	<sql id="where">
+	 	<where>
+	 		<if test="id != null and id != '' "> and u.id = #{id}</if>
+	 		<if test="startdate != null and startdate != '' "> and u.alarmtime <![CDATA[>=]]> #{startdate}</if>
+	 		<if test="enddate != null and enddate != '' "> and u.alarmtime <![CDATA[<=]]> #{enddate}</if>
+	 		<if test="alarmtype != null and alarmtype != '' "> and u.alarmtype = #{alarmtype}</if>
+	       	<if test="imei != null and imei != '' "> and u.imei like '%${imei}%'</if>
+	    </where>
+	</sql>
+	
+	<!-- 获取设备告警列表 -->
+	<select id="selectSysAlarm" parameterType="map"  resultType="com.ets.system.sysEquipmentAlarm.entity.tb_sys_equipment_alarm">
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select * from tb_sys_equipment_alarm u 
+							 <include refid="where"></include>
+							 order by u.alarmtime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+    
+    <!-- 获取总记录数 -->
+    <select id="selectCount" parameterType="map"  resultType="long">
+		select count(*) from tb_sys_equipment_alarm u  <include refid="where"></include>
+    </select>
+    
+    <!-- 新增 -->
+    <insert id="insertSysAlarm" parameterType="com.ets.system.sysEquipmentAlarm.entity.tb_sys_equipment_alarm">
+   		insert into tb_sys_equipment_alarm 
+   		(ID, imei, ALARMTYPE, ALARMSTATUS, ALARMTIME, CTIME)
+		values
+		(#{id}, #{imei}, #{alarmtype}, #{alarmstatus}, #{alarmtime}, #{ctime})
+    </insert>
+    
+ 
+  	<select id="infoSysAlarm" parameterType="map"  resultType="com.ets.system.sysEquipmentAlarm.entity.tb_sys_equipment_alarm">
+		select * from tb_sys_equipment_alarm u  <include refid="where"></include>
+  	</select>
+</mapper>

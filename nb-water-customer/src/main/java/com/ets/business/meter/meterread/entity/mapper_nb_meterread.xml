@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.meter.meterread.dao.MeterreadDao">
+
+	<sql id="where">
+	 	<where>
+	 		<if test="areacode != null and areacode != '' "> and ri.areacode = #{areacode}</if>
+	 		<if test="customercode != null and customercode != '' "> and u.customercode = #{customercode}</if>	
+	 		<if test="startdate != null and startdate != '' "> and u.ctime <![CDATA[>=]]> #{startdate}</if>
+	 		<if test="enddate != null and enddate != '' "> and u.ctime <![CDATA[<=]]> #{enddate}</if>
+	 		<if test="type != null and type != '' "> and u.type = #{type}</if>	
+	 		<if test="yhname != null and yhname != '' "> and ouser.username  like '%${yhname}%'</if>
+	    </where>
+	</sql>
+
+	<sql id="where1">
+		<where>
+			<if test="areacode != null and areacode != '' "> and ri.areacode = #{areacode}</if>
+	 		<if test="customercode != null and customercode != '' "> and u.customercode = #{customercode}</if>	
+			<if test="id != null and id != '' "> and m.id = #{id}</if>
+			<if test="watermeterid != null and watermeterid != '' "> and m.watermeterid = #{watermeterid}</if>
+		</where>
+	</sql>
+
+	<!-- 列表 -->
+	<select id="selectMeterread" parameterType="map"  resultType="com.ets.business.meter.meterread.entity.MeterreadModel">
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select u.id meterreadid,
+							       e.id equipmentid,
+							       e.basenum,
+							       ri.name xqname,
+							       rb.building,
+							       rd.doornum,
+							       ouser.username yhname,
+							       u.value,
+							       u.type,
+							       cu.realname optionname,
+							       u.optiontime,
+							       u.ctime
+							  from nb_meterread u
+							  left join nb_watermeter_equipment e
+							    on e.id = u.watermeterid
+							  left join nb_owner ouser
+							    on e.doornumid = ouser.doornumid
+							  left join nb_customer_user cu
+							    on cu.id = u.optionuser
+							  left join nb_residential_door rd
+							    on rd.id = e.doornumid
+							  left join nb_residential_building rb
+							    on rb.id = rd.buildingid
+							  left join nb_residential_init ri
+							    on ri.id = rb.residentialid
+							 <include refid="where"></include>
+							order by u.ctime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+     <!-- 获取总记录数 -->
+    <select id="selectCount"  resultType="long">
+		select count(*)
+		  from nb_meterread u
+		  left join nb_watermeter_equipment e
+		    on e.id = u.watermeterid
+		  left join nb_owner ouser
+		    on e.doornumid = ouser.doornumid
+		  left join nb_customer_user cu
+		    on cu.id = u.optionuser
+		  left join nb_residential_door rd
+		    on rd.id = e.doornumid
+		  left join nb_residential_building rb
+		    on rb.id = rd.buildingid
+		  left join nb_residential_init ri
+		    on ri.id = rb.residentialid
+		<include refid="where1"></include>
+    </select>    
+    <!-- 新增 -->
+     <insert id="insertMeterread" parameterType="com.ets.business.meter.meterread.entity.nb_meterread">
+        insert into nb_meterread values(#{id},#{watermeterid},#{value},#{type},#{optionuser},#{ctime},#{customercode},#{optiontime})
+     </insert>
+     
+      <!-- 删除 -->
+    <delete id="deleteMeterread" parameterType="java.lang.String">
+        delete from nb_meterread where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </delete>
+    
+     <!-- 更新 -->
+    <update id="updateMeterread" parameterType="com.ets.business.meter.meterread.entity.nb_meterread">
+        update nb_meterread set value=#{value},type=#{type},optionuser=#{optionuser},ctime=#{ctime},watermeterid=#{watermeterid},optiontime=#{optiontime}  where id=#{id}
+    </update>
+    
+    <!-- 更新 -->
+    <update id="updateMeterreadweterId" parameterType="com.ets.business.meter.meterread.entity.nb_meterread">
+        update nb_meterread set value=#{value},type=#{type},optionuser=#{optionuser},ctime=#{ctime},optiontime=#{optiontime}  where watermeterid=#{watermeterid}
+    </update>    
+    
+     <!-- 查看 -->
+    <select id="infoMeterread" resultType="com.ets.business.meter.meterread.entity.nb_meterread" parameterType="java.lang.String">
+        select * from nb_meterread where id=#{id}
+    </select>
+
+     <!-- 查看 -->
+    <select id="infoMeterReadByWaterID" resultType="com.ets.business.meter.meterread.entity.nb_meterread" parameterType="map" >
+        select * from nb_meterread m where m.watermeterid = #{id}
+    </select>
+
+	<!-- 查看 -->
+	<select id="meterreadIfo" resultType="com.ets.business.meter.meterread.entity.MeterreadModel" parameterType="java.lang.String">
+        select u.id as meterreadid,e.id as equipmentid,
+							       e.watermetercode,
+							       e.basenum,
+							       u.value,
+							       u.type,
+							       cu.realname as optionuser,
+							       u.optiontime,
+							       u.ctime
+							  from nb_meterread u
+							  left join nb_watermeter_equipment e
+							    on e.id = u.watermeterid
+							  left join nb_customer_user cu
+							    on cu.id = u.optionuser
+							  where u.id = #{id}
+    </select>
+
+	<select id="queryMeterRead" resultType="com.ets.business.meter.meterread.entity.nb_meterread" parameterType="map" >
+	 select * from nb_meterread m where m.watermeterid = #{watermeterid} and m.customercode = #{customercode}
+	</select>
+	
+	
+	<select id="selectWMHistoryNumCusId" resultType="com.ets.business.meter.meterread.entity.nb_meterread">
+      select t.* from NB_METERREAD t
+      left join nb_watermeter_equipment e on e.id = t.watermeterid
+      where t.customercode = #{customerId} 
+       <if test="watermetercode != null and watermetercode != '' ">  and e.watermetercode = #{watermetercode}</if>
+	</select>
+	
+	
+	<select id="queryAllRead" parameterType="map" resultType="com.ets.business.statistics.owner.entity.nb_owner_water_statistics">
+	
+		    
+		    select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select o.id          as ownerid,
+						       e.id          as equipmentid,
+						       o.useraccount as useraccount,
+						       o.username    as username,
+						       t.value       as degrees,
+						       r.id          as residentialid,
+						       t.optiontime  as ctime
+						  from NB_METERREAD t
+						  left join nb_watermeter_equipment e
+						    on e.id = t.watermeterid
+						  left join nb_owner o
+						    on o.doornumid = e.doornumid
+						  left join nb_residential_door d
+						    on d.id = e.doornumid
+						  left join nb_residential_building b
+						    on b.id = d.buildingid
+						  left join nb_residential_init r
+						    on r.id = b.residentialid
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+	</select>
+	
+	<select id="queryAllReadCount"  resultType="long">
+	
+							select count(*)
+						  from NB_METERREAD t
+						  left join nb_watermeter_equipment e
+						    on e.id = t.watermeterid
+						  left join nb_owner o
+						    on o.doornumid = e.doornumid
+						  left join nb_residential_door d
+						    on d.id = e.doornumid
+						  left join nb_residential_building b
+						    on b.id = d.buildingid
+						  left join nb_residential_init r
+						    on r.id = b.residentialid
+	</select>
+	
+	<select id="queryAllReadCountOnLine"  resultType="long">
+		select count(*) from NB_METERREAD t
+	</select>
+	
+	<select id="queryAllReadOnLine" parameterType="map"  resultType="com.ets.business.meter.meterread.entity.nb_meterread">
+	
+				select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select * from NB_METERREAD u 
+						) u 
+						where rownum <![CDATA[<=]]> #{page}
+					) 
+				where rn > #{limit}
+	</select>
+</mapper>

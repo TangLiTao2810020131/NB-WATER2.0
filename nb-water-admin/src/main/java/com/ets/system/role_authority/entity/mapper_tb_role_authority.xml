@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.system.role_authority.dao.RoleAuthorityDao">
+
+<!-- 根据角色ID返回该角色对应的权限 -->
+<select id="getAuthorityByRoleId" parameterType="java.lang.String" resultType="com.ets.system.role_authority.entity.tb_role_authority">
+	select * from tb_role_authority where roleId=#{id}
+</select>
+
+<insert id="save" parameterType="com.ets.system.role_authority.entity.tb_role_authority">
+        insert into tb_role_authority values(#{id},#{authorityId},#{roleId})
+</insert>
+
+<delete id="deleteAythorityByRoleId" parameterType="java.lang.String">
+	delete from tb_role_authority where roleId=#{id}
+</delete>
+
+<!-- 根据角色ID，查看该角色拥有的权限名称 -->
+<select id="getAuthorityNameByRoleId" parameterType="java.lang.String"   resultType="java.lang.String">
+	select a.authorityname from tb_authority a ,tb_role_authority ra where a.id=ra.authorityId and ra.roleId=#{roleId}
+</select>
+</mapper>

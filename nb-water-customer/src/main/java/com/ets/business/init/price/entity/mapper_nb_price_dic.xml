@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.init.price.dao.PriceDicDao">
+
+	<sql id="where">
+	 	<where>
+	        <if test="customerId != null and customerId != '' "> and u.customerId=#{customerId}</if>
+	    </where>
+	</sql>
+
+	<select id="getPrices" parameterType="map"  resultType="com.ets.business.init.price.entity.nb_price_dic">
+		
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select * from nb_price_dic u 
+							 <include refid="where"></include> 
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+     
+     <!-- 获取总记录数 -->
+    <select id="getCount"  parameterType="java.lang.String" resultType="long">
+    	select count(*) from nb_price_dic where customerId=#{customerId}
+    </select>
+    
+ <!-- 更新 -->
+    <update id="updatePrice" parameterType="com.ets.business.init.price.entity.nb_price_dic">
+        update nb_price_dic set price=#{price},type=#{type} where id=#{id}
+    </update>
+    
+     <!-- 查看 -->
+    <select id="infoPrice" resultType="com.ets.business.init.price.entity.nb_price_dic" parameterType="java.lang.String">
+        select * from nb_price_dic where id=#{id}
+    </select>
+    
+    <insert id="addPrice" parameterType="com.ets.business.init.price.entity.nb_price_dic">
+        insert into nb_price_dic values(#{id},#{price},#{customerId},#{type})
+     </insert>
+     
+     <!-- 删除 -->
+    <delete id="deletePrice" parameterType="java.lang.String">
+        delete from nb_price_dic where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </delete>
+    
+    <select id="selectListPrices" parameterType="java.lang.String"  resultType="com.ets.business.init.price.entity.nb_price_dic">
+    	 select * from nb_price_dic where customerId=#{customerId}
+    </select>
+
+	<select id="isCkeckType" parameterType="map" resultType="java.lang.Integer">
+		select count(*) from NB_PRICE_DIC where TYPE=#{type} and customerId=#{customerId}
+	</select>
+    
+</mapper>

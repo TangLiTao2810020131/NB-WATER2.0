@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.ownerrecord.dao.OwnerRecordDao">
+
+    <sql id="whereGetOwnerRecordList">
+		<where>
+			<if test="customercode != null and customercode != '' "> and u.customercode = #{customercode}</if>
+			<if test="startdate != null and startdate != '' "> and u.ctime <![CDATA[>=]]> #{startdate}</if>
+	 		<if test="enddate != null and enddate != '' "> and u.ctime <![CDATA[<=]]> #{enddate}</if>		
+	 		<if test="useraccount != null and useraccount != '' "> and u.useraccount = #{useraccount}</if> 		
+		</where>
+	</sql>
+	<!-- 查询水表注册记录 -->
+	<select id="getOwnerRecordList" parameterType="map"  resultType="com.ets.business.ownerrecord.entity.nb_owner_record">
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select * from nb_owner_record u 
+							<include refid="whereGetOwnerRecordList"></include>
+							order by u.ctime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+ 
+    <!-- 获取总记录数 -->
+    <select id="getCount"  resultType="long">
+    	select count(*) from nb_owner_record u
+    	<include refid="whereGetOwnerRecordList"></include>
+    </select>
+    
+    <sql id="whereGetOwnerRecord">
+		<where>
+			<if test="id != null and id != '' "> and u.id = #{id}</if>
+			<if test="ownerid != null and ownerid != '' "> and u.ownerid = #{ownerid}</if>
+			<if test="doornumid != null and doornumid != '' "> and u.doornumid = #{doornumid}</if>
+			<if test="customercode != null and customercode != '' "> and u.customercode = #{customercode}</if>
+		</where>
+	</sql>
+    
+    <select id="getOwnerRecord" parameterType="map"  resultType="com.ets.business.ownerrecord.entity.nb_owner_record">
+    	select * from nb_owner_record u 
+    	<include refid="whereGetOwnerRecord"></include>
+    </select>
+    
+    <insert id="insertOwnerRecord" parameterType="com.ets.business.ownerrecord.entity.nb_owner_record">
+	    insert into NB_OWNER_RECORD 
+	    (ID, CUSTOMERCODE, USERACCOUNT, USERNAME, IDNUM, PHONE, OPERATIONMODE, USERUNITPRICE, OWNERID, ADDRESS, DOORNUMID, CTIME,WATERMETERCODE)
+		values (#{id}, #{customercode}, #{useraccount}, #{username}, #{idnum}, #{phone}, #{operationmode}, #{userunitprice}, #{ownerid}, #{address}, #{doornumid}, #{ctime},#{watermetercode})
+    </insert>
+
+	<update id="updateOwnerRecord" parameterType="com.ets.business.ownerrecord.entity.nb_owner_record">
+		update NB_OWNER_RECORD set WATERMETERCODE = #{watermetercode} where ID = #{id}
+	</update>
+</mapper>

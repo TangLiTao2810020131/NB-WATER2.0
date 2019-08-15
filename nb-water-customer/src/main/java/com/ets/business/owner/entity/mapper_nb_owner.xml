@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.owner.dao.OwnerDao">
+
+	<sql id="where">
+	 	<where>
+	 		<if test="areacode != null and areacode != '' "> and i.areacode = #{areacode}</if>
+	 		<if test="customercode != null and customercode != '' "> and o.customercode = #{customercode}</if>
+	 		<if test="startdate != null and startdate != '' "> and o.ctime <![CDATA[>=]]> #{startdate}</if>
+	 		<if test="enddate != null and enddate != '' "> and o.ctime <![CDATA[<=]]> #{enddate}</if>	 		
+	       	<if test="useraccount != null and useraccount != '' "> and o.useraccount like '%${useraccount}%'</if>
+	       	<if test="userunitprice != null and userunitprice != '' "> and o.userunitprice = #{userunitprice}</if>
+	       	<if test="operationmode != null and operationmode != '' "> and o.operationmode = #{operationmode}</if>	       		       	
+	    </where>
+	</sql>
+	<sql id="where1">
+	 	<where>
+	 		<if test="id != null and id != '' "> and o.id = #{id}</if>
+	 		<if test="customercode != null and customercode != '' "> and o.customercode = #{customercode}</if>
+	       	<if test="doornumid != null and doornumid != '' "> and o.doornumid = #{doornumid}</if>
+	    </where>
+	</sql>
+	<sql id="whereCheck">
+	 	<where>
+	 		<if test="customercode != null and customercode != '' "> and customercode = #{customercode}</if>
+	 		<if test="useraccount != null and useraccount != '' "> and useraccount = #{useraccount}</if>	 		
+	 		<if test="idnum != null and idnum != '' "> and idnum = #{idnum}</if>
+	    </where>
+	</sql>		
+	<!-- 获取角色权限列表 -->
+	<select id="selectOwner" parameterType="map"  resultType="com.ets.business.owner.entity.OwnerModel">
+			select * from 
+			(
+				select u.*,rownum rn from 
+				(
+					select o.id,
+					       o.useraccount,
+					       o.username,
+					       o.phone,
+					       o.sex,
+					       pri.type,
+					       payd.paymode as operationmode,
+					       we.watermetercode,
+					       o.ctime
+					  from NB_OWNER o
+					  left join nb_watermeter_equipment we
+             			on o.doornumid = we.doornumid
+					  left join nb_pay_dict payd
+					    on payd.id = o.operationmode
+					  left join nb_price_dic pri
+					    on o.userunitprice = pri.id
+					  left join nb_residential_door d
+					    on d.id = o.doornumid
+					  left join nb_residential_building b
+					     on b.id = d.buildingid
+					  left join nb_residential_init i
+					    on i.id = b.residentialid
+				    <include refid="where"></include> 
+				 order by o.ctime desc
+				) u 
+				where rownum <![CDATA[<=]]> #{page}
+			) where rn > #{limit} 
+    </select>
+    
+    <!-- 获取总记录数 -->
+    <select id="selectCount"  resultType="long" parameterType="map" >
+    						select count(*)
+					  from NB_OWNER o
+					  left join nb_pay_dict payd
+					    on payd.id = o.operationmode
+					  left join nb_price_dic pri
+					    on o.userunitprice = pri.id
+					  left join nb_residential_door d
+					    on d.id = o.doornumid
+					  left join nb_residential_building b
+					      on b.id = d.buildingid
+					  left join nb_residential_init i
+					    on i.id = b.residentialid
+				    <include refid="where"></include> 
+    </select>
+    
+    <!-- 新增 -->
+    <insert id="insertOwner" parameterType="com.ets.business.owner.entity.nb_owner">
+        insert into nb_owner values(#{id},#{customercode},#{useraccount},#{username},#{documenttype},#{idnum},
+        #{phone},#{sex},#{operationmode},#{userunitprice},#{accessid},#{describe},#{ctime},#{doornumid})
+    </insert>
+    
+    <!-- 更新资源 -->
+    <update id="updateOwner" parameterType="com.ets.business.owner.entity.nb_owner">
+        update nb_owner set username=#{username},documenttype=#{documenttype}
+        ,idnum=#{idnum},phone=#{phone},sex=#{sex},operationmode=#{operationmode},userunitprice=#{userunitprice}
+        ,accessid=#{accessid},describe=#{describe}
+         where id=#{id}
+    </update>
+    
+    <!-- 获取总记录数 -->
+    <select id="infoOwner"  resultType="com.ets.business.owner.entity.nb_owner" parameterType="map">
+    	select * from nb_owner o  <include refid="where1"></include> 
+    </select>
+    
+    <!-- 查看资源 -->
+    <select id="ownerInfo" resultType="com.ets.business.owner.entity.OwnerModel" parameterType="map" >
+			select o.id,
+			       o.useraccount,
+			       o.username,
+			       o.documenttype,
+			       o.idnum,
+			       o.phone,
+			       o.sex,
+			       payd.paymode as operationmode,
+			       pd.type || '-(' || pd.price || '元/吨)' as type,
+			       p.province || c.city || a.area || r.name || rb.building || '栋' || rd.doornum || '室' as address,
+			       o.doornumid,
+			       o.describe
+			  from NB_OWNER o
+			  left join nb_pay_dict payd 
+			  	on payd.id = o.operationmode
+			  left join nb_price_dic pd
+			    on pd.id = o.userunitprice
+			  left join nb_residential_door rd
+			    on rd.id = o.doornumid
+			  left join nb_residential_building rb
+			    on rb.id = rd.buildingid
+			  left join nb_residential_init r
+			    on r.id = rb.residentialid
+			  left join tb_province p
+			    on p.id = r.provincecode
+			  left join tb_city c
+			    on c.id = r.citycode
+			  left join tb_area a
+			    on a.id = r.areacode
+			   <include refid="where1"></include>   
+    </select>
+    
+    <!-- 查看资源 -->
+    <select id="infoOwnerList" resultType="com.ets.business.owner.entity.nb_owner" parameterType="java.lang.String">
+        select * from nb_owner where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </select>
+
+	<select id="infoUser" resultType="com.ets.business.owner.entity.nb_owner" parameterType="java.lang.String">
+		select * from nb_owner where DOORNUMID in
+		<foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+			#{empnoItem}
+		</foreach>
+	</select>
+
+    <!-- 删除 -->
+    <delete id="deleteOwner" parameterType="java.lang.String">
+        delete from nb_owner where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </delete>
+
+    <!-- 查看资源 -->
+    <select id="selectOwnerList" resultType="com.ets.business.owner.entity.nb_owner" parameterType="java.lang.String">
+        select * from nb_owner where customercode=#{customerId}
+    </select>
+    
+     <!-- 验证唯一性 -->
+    <select id="isCkeckUserAccount" resultType="java.lang.Integer" parameterType="map">
+        select count(*)  from nb_owner <include refid="whereCheck"></include>   
+    </select>
+    <!--过户更新-->
+    <update id="transferOwner" parameterType="com.ets.business.owner.entity.nb_owner">
+          update nb_owner set useraccount=#{useraccount}, username=#{username},documenttype=#{documenttype}
+        ,idnum=#{idnum},phone=#{phone},sex=#{sex},operationmode=#{operationmode},userunitprice=#{userunitprice}
+        ,accessid=#{accessid},describe=#{describe}
+         where id=#{id}
+    </update>
+
+    <!-- 查看资源 -->
+    <select id="queryOwneDoorId" resultType="com.ets.business.owner.entity.nb_owner" parameterType="map">
+        select * from nb_owner where customercode=#{customerId} and doornumid = #{doornumid}
+    </select>
+    
+     <!-- 查看资源 -->
+    <select id="queryOwnerCusId" resultType="com.ets.business.owner.entity.nb_owner" parameterType="map">
+        select * from nb_owner where customercode=#{customerId}
+        <if test="useraccount != null and useraccount != '' ">  and useraccount = #{useraccount}</if>
+    </select>   
+    
+    <select id="queryOwner" resultType="com.ets.business.owner.entity.nb_owner" parameterType="map">
+		select o.useraccount,o.username,e.watermetercode
+		  from nb_owner o
+		  left join nb_watermeter_equipment e
+		    on o.doornumid = e.doornumid
+		 where o.customercode = #{customercode}
+		   and e.watermetercode = #{imei}
+    </select>
+    
+</mapper>

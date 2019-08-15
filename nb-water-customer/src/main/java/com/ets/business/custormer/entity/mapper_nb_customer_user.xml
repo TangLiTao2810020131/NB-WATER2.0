@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.business.custormer.dao.CustomerUserDao">
+
+
+	<sql id="where">
+	 	<where>
+	        <if test="cid != null and cid != '' "> and u.cid=#{cid}</if>
+	        <if test="type != null and type != '' "> and u.type=#{type}</if>
+	        <if test="isopen != null and isopen != '' "> and u.isopen=#{isopen}</if>
+	    </where>
+	</sql>
+
+<!-- 列表 -->
+	<select id="getCustomerUsers" parameterType="map"  resultType="com.ets.business.custormer.entity.nb_customer_user">
+		<!-- <![CDATA[select * from (select u.*,rownum rn from nb_customer_user u where rownum <= #{page} and cid=#{cid} ) where rn > #{limit}]]>  -->
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select * from nb_customer_user u 
+							 <include refid="where"></include> 
+							order by u.ctime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+     
+	<select id="selectCustomerUsersType" parameterType="map"  resultType="com.ets.business.custormer.entity.nb_customer_user">
+		select * from nb_customer_user u 
+		 <include refid="where"></include> 
+	</select>     
+     
+     <!-- 获取总记录数 -->
+    <select id="getCount" parameterType="map" resultType="long">
+    	select count(*) from nb_customer_user where cid=#{cid}
+    </select>
+
+    
+    <!-- 新增 -->
+     <insert id="addCustomerUser" parameterType="com.ets.business.custormer.entity.nb_customer_user">
+        insert into nb_customer_user values(#{id},#{cid},#{username},#{password},#{isopen},#{type},#{ctime},#{tel},#{loginnum},#{realname})
+     </insert>
+     
+      <!-- 删除 -->
+    <delete id="deleteCustomerUser" parameterType="java.lang.String">
+        delete from nb_customer_user where id in
+        <foreach item="empnoItem" collection="array" open="(" separator="," close=")">
+            #{empnoItem}
+        </foreach>
+    </delete>
+    
+     <!-- 更新 -->
+    <update id="updateCustomerUser" parameterType="com.ets.business.custormer.entity.nb_customer_user">
+        update nb_customer_user set isopen=#{isopen},type=#{type},tel=#{tel},realname=#{realname} where id=#{id}
+    </update>
+    
+     <!-- 查看 -->
+    <select id="infoCustomerUser" resultType="com.ets.business.custormer.entity.nb_customer_user" parameterType="java.lang.String">
+        select * from nb_customer_user where id=#{id}
+    </select>
+    
+    <!-- 登录验证 -->
+    <select id="login" parameterType="map" resultType="map">
+    	select u.id,u.CTIME,REALNAME ,REMARKS, EMAIL, CUSTOMERSTATUS, PASSWORD, ADDRESS, LINKMAN, USERNAME, u.TEL, ISOPEN, CUSTOMERNAME,TYPE, CID,c.MAXNUM  from nb_customer c , nb_customer_user u where c.customerName=#{customerName} and u.CID= c.ID and c.customerStatus=1 and u.username=#{username} and u.password=#{password} and u.isopen=1
+    </select>
+	<!--新增职员信息时验证账号的唯一性-->
+	<select id="isCheckCustomerUser" parameterType="map" resultType="java.lang.Integer">
+		select count(*) from NB_CUSTOMER_USER where USERNAME=#{username} and cid = #{cid}
+	</select>
+     <!-- 更新 -->
+    <update id="editCustomerUser" parameterType="com.ets.business.custormer.entity.nb_customer_user">
+        update nb_customer_user set tel=#{tel} where id=#{id}
+    </update>
+
+    <update id="updateCustomerUserPass" parameterType="com.ets.business.custormer.entity.nb_customer_user">
+        update nb_customer_user set password=#{password},loginnum=#{loginnum} where id=#{id}
+    </update>
+	<!--重置密码-->
+	<update id="restPassword" parameterType="java.util.Map">
+		update nb_customer_user set PASSWORD=#{password} where ID in
+		<foreach item="empnoItem" collection="id" open="(" separator="," close=")">
+			#{empnoItem}
+		</foreach>
+	</update>
+    
+</mapper>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ets.system.sysCommandSendLog.dao.SysCommandSendLogDao">
+
+	<sql id="where">
+	 	<where>
+	 		<if test="id != null and id != '' "> and u.id = #{id}</if>
+	 		<if test="startdate != null and startdate != '' "> and u.sendtime <![CDATA[>=]]> #{startdate}</if>
+	 		<if test="enddate != null and enddate != '' "> and u.sendtime <![CDATA[<=]]> #{enddate}</if>	 	
+	 		<if test="deviceid != null and deviceid != '' "> and u.deviceid = #{deviceid}</if>	
+	 		<if test="imei != null and imei != '' "> and u.imei like '%${imei}%'</if>
+	       	<if test="commandid != null and commandid != '' "> and u.commandid = #{commandid}</if>
+	       	<if test="status != null and status != '' "> and u.status = #{status}</if>	       		       	
+	    </where>
+	</sql>
+
+	<!-- 获取列表 -->
+	<select id="selectSysCommandSendLog" parameterType="map"  resultType="com.ets.system.sysCommandSendLog.entity.tb_sys_command_send_log">
+<!-- 			<![CDATA[select * from (select u.*,rownum rn from nb_access_dict u where rownum <= #{page} order by u.ctime desc) where rn > #{limit}]]>  -->
+			select * from 
+				(
+					select * from 
+					(
+						select u.*,rownum rn from 
+						(
+							select u.*,b.name as customercode from TB_SYS_COMMAND_SEND_LOG u 
+							left join tb_sys_equipment e on u.deviceid = e.deviceid
+							left join tb_sys_batch b on e.batchid = b.id
+							<include refid="where"></include>
+							 order by u.sendtime desc
+						) u 
+						where rownum <![CDATA[<=]]> #{page} 
+					) 
+					where rn > #{limit}
+				)
+    </select>
+
+    <!-- 获取总记录数 -->
+    <select id="selectCount"  resultType="long">
+   	 	select count(*) from TB_SYS_COMMAND_SEND_LOG u  <include refid="where"></include>
+    </select>
+    
+    <!-- 获取总记录数 -->
+    <select id="info"  parameterType="map"  resultType="com.ets.system.sysCommandSendLog.entity.tb_sys_command_send_log">
+   	 	select * from TB_SYS_COMMAND_SEND_LOG u  <include refid="where"></include>
+    </select>
+
+	<insert id="insertSysCommandSendLog" parameterType="com.ets.system.sysCommandSendLog.entity.tb_sys_command_send_log">
+		insert into TB_SYS_COMMAND_SEND_LOG (ID, COMMANDID, DEVICEID, COMMAND, SENDTIME, EXECUTETIME,IMEI)
+										values (#{id}, #{commandid}, #{deviceid}, #{command}, #{sendtime}, #{executetime},#{imei})
+	</insert>
+	
+	<update id ="updateSysCommandSendLog" parameterType="com.ets.system.sysCommandSendLog.entity.tb_sys_command_send_log">
+		update TB_SYS_COMMAND_SEND_LOG set rcommand = #{rcommand},status=#{status},ctime=#{ctime} where commandid = #{commandid}
+	</update>
+	
+	<select id="selectNewestTime"  parameterType="java.lang.String" resultType="java.lang.String">
+		select r.ctime from (select * from NB_READ_LOG t where t.deviceid = #{deviceid} order by t.ctime desc ) r where rownum = 1
+	</select>
+</mapper>
